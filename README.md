@@ -6,13 +6,13 @@ An easy to use link between Ruby (on Rails) and FileMaker using the FileMaker Da
 
 Install the gem yourself
 ```ruby
- gem install Trophonius
+ gem install trophonius
 ```
 
 Or add to your gemfile
 
 ```ruby
- gem Trophonius, '>= 1.0.0' 
+ gem 'trophonius', '>= 1.0.0' 
 ```
 And run bundle install
 # Configuration
