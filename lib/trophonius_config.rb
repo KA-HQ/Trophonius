@@ -1,3 +1,4 @@
+require 'active_support/configurable'
 module Trophonius
   class Trophonius::Configuration
     include ActiveSupport::Configurable
