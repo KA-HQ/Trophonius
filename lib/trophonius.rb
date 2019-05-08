@@ -1,8 +1,8 @@
-require "trophonius_request"
-require "trophonius_model"
-require "trophonius_config"
+require 'trophonius_request'
+require 'trophonius_model'
+require 'trophonius_config'
 
-module Trophonius
+module Trophonius # :nodoc:
   def self.configuration
     @configuration ||= Configuration.new
   end

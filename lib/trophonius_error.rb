@@ -1,46 +1,49 @@
-require "json"
-require "trophonius_config"
+require 'json'
+require 'trophonius_config'
 
 module Trophonius
   module Trophonius::Error
-    class RecordNotFoundError < StandardError; end
-    class FieldUnexistingError < NoMethodError; end
-    class ScriptUnexistingError < NoMethodError; end
-    class LayoutUnexistingError < NoMethodError; end
-    class InvalidTokenError < StandardError; end
-    class UnauthenticatedError < StandardError; end
-    class FieldNotModifiableError < StandardError; end
-    class ResponseNotYetImplementedError < StandardError; end
-    class UnknownFileMakerError < StandardError; end
-    class UserCanceledError < StandardError; end
-    class MemoryError < StandardError; end
-    class FileError < StandardError; end
-    class CommandError < StandardError; end
+    class RecordNotFoundError < StandardError; end # :nodoc:
+    class FieldUnexistingError < NoMethodError; end # :nodoc:
+    class ScriptUnexistingError < NoMethodError; end # :nodoc:
+    class LayoutUnexistingError < NoMethodError; end # :nodoc:
+    class InvalidTokenError < StandardError; end # :nodoc:
+    class UnauthenticatedError < StandardError; end # :nodoc:
+    class FieldNotModifiableError < StandardError; end # :nodoc:
+    class ResponseNotYetImplementedError < StandardError; end # :nodoc:
+    class UnknownFileMakerError < StandardError; end # :nodoc:
+    class UserCanceledError < StandardError; end # :nodoc:
+    class MemoryError < StandardError; end # :nodoc:
+    class FileError < StandardError; end # :nodoc:
+    class CommandError < StandardError; end # :nodoc:
 
+    ##
+    # Throws an error corresponding to the error number
+    # :args: error_id, more_info
     def self.throw_error(error_id, more_info = 0)
       case error_id
-      when "-1"
-        raise UnknownFileMakerError.new(), "Unknown Error Ocurred"
-      when "0"
-        raise UnknownFileMakerError.new(), "Unknown Error Ocurred"
-      when "1"
-        raise UserCanceledError.new(), "An outside source canceled the action"
-      when "2"
-        raise MemoryError.new(), "FileMaker encountered a memory error"
-      when "3"
-        raise CommandError.new(), "Command is unavailable (for example, wrong operating system or mode)"
-      when "4"
-        raise CommandError.new(), "Command is unknown"
-      when "5"
-        raise CommandError.new(), "Command is invalid, check your FileMaker script/calculation"
-      when "6"
-        raise FileError.new(), "File is read-only"
-      when "7"
-        raise MemoryError.new(), "FileMaker is running out of memory"
-      when "8"
-        raise RecordNotFoundError.new(), "Empty result"
-      when "9"
-        raise UnauthenticatedError.new(), "User has insufficient privileges"
+      when '-1'
+        raise UnknownFileMakerError.new, 'Unknown Error Ocurred'
+      when '0'
+        raise UnknownFileMakerError.new, 'Unknown Error Ocurred'
+      when '1'
+        raise UserCanceledError.new, 'An outside source canceled the action'
+      when '2'
+        raise MemoryError.new, 'FileMaker encountered a memory error'
+      when '3'
+        raise CommandError.new, 'Command is unavailable (for example, wrong operating system or mode)'
+      when '4'
+        raise CommandError.new, 'Command is unknown'
+      when '5'
+        raise CommandError.new, 'Command is invalid, check your FileMaker script/calculation'
+      when '6'
+        raise FileError.new, 'File is read-only'
+      when '7'
+        raise MemoryError.new, 'FileMaker is running out of memory'
+      when '8'
+        raise RecordNotFoundError.new, 'Empty result'
+      when '9'
+        raise UnauthenticatedError.new, 'User has insufficient privileges'
       # when "10"
       # when "11"
       # when "12"
@@ -56,15 +59,15 @@ module Trophonius
       # when "20"
       # when "21"
       # when "100"
-      when "101"
-        raise RecordNotFoundError.new(), "Record #{more_info} was not found"
-      when "102"
-        raise FieldUnexistingError.new(), "Field does not exist"
+      when '101'
+        raise RecordNotFoundError.new, "Record #{more_info} was not found"
+      when '102'
+        raise FieldUnexistingError.new, 'Field does not exist'
       # when "103"
-      when "104"
-        raise ScriptUnexistingError.new(), "Script does not exist"
-      when "105"
-        raise LayoutUnexistingError.new(), "Layout does not exist"
+      when '104'
+        raise ScriptUnexistingError.new, 'Script does not exist'
+      when '105'
+        raise LayoutUnexistingError.new, 'Layout does not exist'
       # when "106"
       # when "107"
       # when "108"
@@ -81,8 +84,8 @@ module Trophonius
       # when "130"
       # when "131"
       # when "200"
-      when "201"
-        raise FieldNotModifiableError.new(), "Trying to write to a read-only field"
+      when '201'
+        raise FieldNotModifiableError.new, 'Trying to write to a read-only field'
       # when "202"
       # when "203"
       # when "204"
@@ -109,11 +112,11 @@ module Trophonius
       # when "307"
       # when "308"
       # when "400"
-      when "401"
-        raise RecordNotFoundError.new(), "Record #{more_info} was not found"
+      when '401'
+        raise RecordNotFoundError.new, "Record #{more_info} was not found"
       # when "402"
-      when "403"
-        raise UnauthenticatedError.new(), "You are unauthenticated to perform this request"
+      when '403'
+        raise UnauthenticatedError.new, 'You are unauthenticated to perform this request'
       # when "404"
       # when "405"
       # when "406"
@@ -216,8 +219,8 @@ module Trophonius
       # when "922"
       # when "923"
       # when "951"
-      when "952"
-        raise InvalidTokenError.new(), "Could not retrieve a valid token from FileMaker, check your FileMaker server"
+      when '952'
+        raise InvalidTokenError.new, 'Could not retrieve a valid token from FileMaker, check your FileMaker server'
       # when "954"
       # when "955"
       # when "956"
@@ -283,9 +286,9 @@ module Trophonius
       # when "1630"
       # when "1631"
       # when "1632"
-      # when "1633"      
+      # when "1633"
       else
-        raise ResponseNotYetImplementedError.new(), "An unknown error has been encountered: err_no was #{error_id}"
+        raise ResponseNotYetImplementedError.new, "An unknown error has been encountered: err_no was #{error_id}"
       end
     end
   end
