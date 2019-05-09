@@ -16,6 +16,7 @@ module Trophonius
     class MemoryError < StandardError; end # :nodoc:
     class FileError < StandardError; end # :nodoc:
     class CommandError < StandardError; end # :nodoc:
+    class ConnectionError < StandardError; end # :nodoc:
 
     ##
     # Throws an error corresponding to the error number
@@ -284,7 +285,8 @@ module Trophonius
       # when "1628"
       # when "1629"
       # when "1630"
-      # when "1631"
+      when '1631'
+        raise ConnectionError.new, 'An error occurred while attempting to connect to the FileMaker server'
       # when "1632"
       # when "1633"
       else

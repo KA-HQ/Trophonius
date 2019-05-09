@@ -18,15 +18,23 @@ module Trophonius
     #
     # @return [JSON] parsed json of the response
     def self.make_request(url_param, auth, method, body, params = '')
+      ssl_verifyhost = Trophonius.config.local_network ? 0 : 2
+      ssl_verifypeer = !Trophonius.config.local_network
       request = Typhoeus::Request.new(
         url_param,
         method: method.to_sym,
         body: body,
         params: params,
+        ssl_verifyhost: ssl_verifyhost,
+        ssl_verifypeer: ssl_verifypeer,
         headers: { 'Content-Type' => 'application/json', Authorization: auth.to_s }
       )
       temp = request.run
-      JSON.parse(temp.response_body)
+      begin
+        JSON.parse(temp.response_body)
+      rescue Exception
+        Error.throw_error('1631')
+      end
     end
 
     ##

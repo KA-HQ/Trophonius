@@ -31,6 +31,8 @@ Trophonius.configure do |config|
   config.username = "Username to Access the Database" # or Rails.application.credentials.dig(:username) (requires >= Rails 5.2)
   config.password = "Y0urAmaz1ngPa$$w0rd" # or Rails.application.credentials.dig(:password) (requires >= Rails 5.2)
   config.count_result_script = "script that can be used to count the results (optional)"
+  config.ssl = true # or false depending on whether https or http should be used
+  config.local_network = true # if true the ssl certificate will not be verified to allow for self-signed certificates use with caution
 end
 ```
 

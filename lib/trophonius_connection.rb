@@ -10,7 +10,7 @@ module Trophonius
 
     def self.connect
       @token = setup_connection
-      @last_connection = Time.current
+      @last_connection = Time.now
       @token
     end
 
@@ -21,20 +21,30 @@ module Trophonius
 
     def self.setup_connection
       @token = ''
+      ssl_verifyhost = Trophonius.config.local_network ? 0 : 2
+      ssl_verifypeer = !Trophonius.config.local_network
       url = URI("http#{Trophonius.config.ssl == true ? 's' : ''}://#{Trophonius.config.host}/fmi/data/v1/databases/#{Trophonius.config.database}/sessions")
-
       request = Typhoeus::Request.new(
         url,
         method: :post,
+        verbose: true,
         body: {},
         params: {},
+        ssl_verifyhost: ssl_verifyhost,
+        ssl_verifypeer: ssl_verifypeer,
         headers: { 'Content-Type' => 'application/json', Authorization: "Basic #{Base64.strict_encode64("#{Trophonius.config.username}:#{Trophonius.config.password}")}" }
       )
       temp = request.run
-      if JSON.parse(temp.response_body)['messages'][0]['code'] != '0'
-        Error.throw_error(response['messages'][0]['code'])
+
+      begin
+        parsed = JSON.parse(temp.response_body)
+        if parsed['messages'][0]['code'] != '0'
+          Error.throw_error(response['messages'][0]['code'])
+        end
+        return parsed['response']['token']
+      rescue Exception
+        Error.throw_error('1631')
       end
-      JSON.parse(temp.response_body)['response']['token']
     end
 
     ##
@@ -75,7 +85,7 @@ module Trophonius
     # Returns whether the current connection is still valid
     # @return [Boolean] True if the connection is valid False if invalid
     def self.valid_connection?
-      @last_connection.nil? ? false : (((Time.current - last_connection) / 1.minute).round <= 15 || test_connection)
+      @last_connection.nil? ? false : (((Time.now - last_connection) / 60).round <= 15 || test_connection)
     end
   end
 end

@@ -13,5 +13,6 @@ module Trophonius
     config_accessor(:count_result_script) { '' }
     config_accessor(:layout_name) { '' }
     config_accessor(:non_modifiable_fields) { [] }
+    config_accessor(:local_network) { false }
   end
 end
