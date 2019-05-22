@@ -27,7 +27,6 @@ module Trophonius
       request = Typhoeus::Request.new(
         url,
         method: :post,
-        verbose: true,
         body: {},
         params: {},
         ssl_verifyhost: ssl_verifyhost,
