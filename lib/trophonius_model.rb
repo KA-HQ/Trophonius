@@ -39,7 +39,7 @@ module Trophonius
     # 
     # @param [Hash] fieldData: the fields to fill with the data
     #
-    # @return [Record] the 
+    # @return [Record] the created record
     #   Model.create(fieldOne: "Data")
     def self.create(fieldData)
       url = URI("http#{Trophonius.config.ssl == true ? "s" : ""}://#{Trophonius.config.host}/fmi/data/v1/databases/#{Trophonius.config.database}/layouts/#{layout_name}/records")
