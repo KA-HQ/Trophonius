@@ -148,18 +148,19 @@ module Trophonius
       hash.id = result["recordId"]
       hash.layout_name = layout_name
       result["fieldData"].keys.each do |key|
-        unless key[/\s/] || key[/\W/]
-          hash.send(:define_singleton_method, key.to_s) do
-            hash[key]
-          end
-          unless non_modifiable_fields&.include?(key)
-            @all_fields.merge!(key.to_s.downcase => key.to_s)
-            hash.send(:define_singleton_method, "#{key.to_s}=") do |new_val|
-              hash[key] = new_val
-              hash.modifiable_fields[key] = new_val
-            end
+        # unless key[/\s/] || key[/\W/]
+        hash.send(:define_singleton_method, ActiveSupport::Inflector.parameterize(ActiveSupport::Inflector.underscore(key.to_s), separator: '_')) do
+          hash[key]
+        end
+        unless non_modifiable_fields&.include?(key)
+          @all_fields.merge!(ActiveSupport::Inflector.parameterize(ActiveSupport::Inflector.underscore(key.to_s), separator: '_').downcase => ActiveSupport::Inflector.parameterize(ActiveSupport::Inflector.underscore(key.to_s), separator: '_'))
+          hash.send(:define_singleton_method, "#{ActiveSupport::Inflector.parameterize(ActiveSupport::Inflector.underscore(key.to_s), separator: '_')}=") do |new_val|
+            hash[key] = new_val
+            hash.modifiable_fields[key] = new_val
+            hash.modified_fields[key] = new_val
           end
         end
+        # end
         hash.merge!({key => result["fieldData"][key]})
         unless non_modifiable_fields&.include?(key)
           hash.modifiable_fields.merge!({key => result["fieldData"][key]})
@@ -167,13 +168,13 @@ module Trophonius
       end
       result["portalData"].keys.each do |key|
         unless key[/\s/] || key[/\W/]
-          hash.send(:define_singleton_method, key.to_s) do
+          hash.send(:define_singleton_method, ActiveSupport::Inflector.parameterize(ActiveSupport::Inflector.underscore(key.to_s), separator: '_')) do
             hash[key]
           end
         end
         result["portalData"][key].each_with_index do |inner_hash|
           inner_hash.keys.each do |inner_key|
-            inner_method = inner_key.gsub(/\w+::/, "")
+            inner_method = ActiveSupport::Inflector.parameterize(ActiveSupport::Inflector.underscore(inner_key.gsub(/\w+::/, "").to_s), separator: '_')
             unless inner_method[/\s/] || inner_method[/\W/]
               inner_hash.send(:define_singleton_method, inner_method.to_s) { inner_hash[inner_key] }
               inner_hash.send(:define_singleton_method, "id") { inner_hash["recordId"] }

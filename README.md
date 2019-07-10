@@ -55,12 +55,17 @@ class MyModel < Trophonius::Model
 end
 ```
 
+## Field names
+
+Since FileMaker allows anything to be a field name, Trophonius changes your fieldnames slightly to work like methods for the record. Trophonius changes your field names to a rubystyle, snake_cased name.
+This means that if two of your fields have the same name only one of those fields will be converted to a method, i.e. "New Field" and "New (Field)" will become both "new_field".
+
 ## Create records
 
 To create a new record in the FileMaker database you only have to call the create method:
 
 ```ruby
-  MyModel.create(FieldOne: "Data", NumberField: 1)
+  MyModel.create(field_one: "Data", number_field: 1)
 ```
 
 The new record will be created immediately and filled with the provided data. The fieldnames are the same as the names in FileMaker. If the fieldname in FileMaker contains non-word characters, the fieldname should be in quotes.
@@ -77,8 +82,11 @@ Trophonius allows multiple ways to get records. The easiest ways are either .all
 If you want a more restricted set of records or a specific record you might want to use the find functionality. To find a single specific record the .find method can be used. This method requires you to provide the recordid you would like to retrieve from FileMaker. When you want to find a set of records where a condition holds, the .where method should be used. This method returns all records where the condition holds, or an empty set if there are no records with this condition.
 
 ```ruby
-  MyModel.find(100) # Record with recordID 100 (if available)
-  MyModel.where(NumberField: 100) # Records where NumberField is 100 (if any)
+  record = MyModel.find(100) # Record with recordID 100 (if available)
+  MyModel.where(number_field: 100) # Records where NumberField is 100 (if any)
+  record.portal.each do |portal_record|
+    portal_record.child_field
+  end
 ```
 
 ## Update records
@@ -88,9 +96,9 @@ Once all fields are set, run the save method to store the new data in FileMaker.
 
 ```ruby
   record = MyModel.find(100) # or use MyModel.where and loop over the RecordSet
-  record.FieldOne = "New Value"
-  record.NumberField = 42
-  record["Field With Spaces and Non-word Characters!"] = "New value"
+  record.field_one = "New Value"
+  record.number_field = 42
+  record["Field With Spaces and Non-word Characters!"] = "New value" # or record.field_with_spaces_and_non_word_characters
   record.save
 ```
 
@@ -113,11 +121,12 @@ To run a FileMaker script from the context of a model you can call the run_scrip
 
 # To do
 
-- [ ] Better portal support
+- [x] Better portal support (get supported)
+- [ ] Support portal set field directly
 - [ ] Better chainable where queries
 - [ ] Store token in Redis
 - [ ] More container support
-- [ ] Remove non_modifiable_fields requirement from Model
+- [x] Remove non_modifiable_fields requirement from Model
 
 # Contributing
 

@@ -6,12 +6,13 @@ module Trophonius
   #
   # A Record is contained in a RecordSet and has methods to retrieve data from the fields inside the Record-hash
   class Trophonius::Record < Hash
-    attr_accessor :id, :layout_name, :modifiable_fields
+    attr_accessor :id, :layout_name, :modifiable_fields, :modified_fields
 
     ##
     # Initializes a new Record
     def initialize
       @modifiable_fields = {}
+      @modified_fields = {}
     end
 
     def []=(field, new_val)
@@ -26,7 +27,7 @@ module Trophonius
     # @return [True] if successful
     def save
       url = URI("http#{Trophonius.config.ssl == true ? 's' : ''}://#{Trophonius.config.host}/fmi/data/v1/databases/#{Trophonius.config.database}/layouts/#{layout_name}/records/#{id}")
-      body = "{\"fieldData\": #{modifiable_fields.to_json}}"
+      body = "{\"fieldData\": #{modified_fields.to_json}}"
       response = Request.make_request(url, "Bearer #{Request.get_token}", 'patch', body)
       if response['messages'][0]['code'] != '0'
         Error.throw_error(response['messages'][0]['code'])
