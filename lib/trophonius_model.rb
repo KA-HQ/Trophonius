@@ -66,7 +66,7 @@ module Trophonius
     #   Model.where(fieldOne: "Data")
     def self.where(fieldData)
       url = URI("http#{Trophonius.config.ssl == true ? "s" : ""}://#{Trophonius.config.host}/fmi/data/v1/databases/#{Trophonius.config.database}/layouts/#{self.layout_name}/_find")
-      body = "{\"query\": [#{fieldData.to_json}]}"
+      body = {query: [fieldData], limit:"100000"}.to_json
       response = Request.make_request(url, "Bearer #{Request.get_token}", "post", body)
       if response["messages"][0]["code"] != "0"
         return RecordSet.new(self.layout_name, self.non_modifiable_fields) if response["messages"][0]["code"] == "101" || response["messages"][0]["code"] == "401"
