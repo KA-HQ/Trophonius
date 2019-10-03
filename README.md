@@ -66,7 +66,7 @@ end
 
 ## Field names
 
-Since FileMaker allows anything to be a field name, Trophonius changes your fieldnames slightly to work like methods for the record. Trophonius changes your field names to a rubystyle, snake_cased name.
+Since FileMaker allows anything to be a field name, Trophonius changes your fieldnames slightly to work like methods for the record. Trophonius changes your field names to a rubystyle, snake_cased name. To retrieve the translations you can use the method MyModel.translations. To use the translations in the create, where and edit methods, Trophonius requires at least one record to exist in order to create the translations.
 This means that if two of your fields have the same name only one of those fields will be converted to a method, i.e. "New Field" and "New (Field)" will become both "new_field".
 
 ## Create records

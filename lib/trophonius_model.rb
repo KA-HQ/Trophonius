@@ -7,8 +7,6 @@ require "trophonius_error"
 module Trophonius
   # This class will retrieve the records from the FileMaker database and build a RecordSet filled with Record objects. One Record object represents a record in FileMaker.
   class Trophonius::Model
-    # Contains all the fields on the model (modifiable and non_modifiable)
-    attr_reader :all_fields
 
     ##
     # Sets up the configuration for the model. 
@@ -19,7 +17,8 @@ module Trophonius
       @configuration ||= Configuration.new
       @configuration.layout_name = configuration[:layout_name]
       @configuration.non_modifiable_fields = configuration[:non_modifiable_fields]
-      @all_fields = {}
+      @configuration.all_fields = {}
+      @configuration.translations = {}
     end
 
     ##
@@ -35,6 +34,16 @@ module Trophonius
     end
 
     ##
+    # Returns the translations of the fields
+    def self.translations
+      @configuration.translations
+    end
+    
+    def self.create_translations
+      self.first
+    end
+
+    ##
     # Creates and saves a record in FileMaker
     # 
     # @param [Hash] fieldData: the fields to fill with the data
@@ -43,7 +52,18 @@ module Trophonius
     #   Model.create(fieldOne: "Data")
     def self.create(fieldData)
       url = URI("http#{Trophonius.config.ssl == true ? "s" : ""}://#{Trophonius.config.host}/fmi/data/v1/databases/#{Trophonius.config.database}/layouts/#{layout_name}/records")
-      body = "{\"fieldData\": #{fieldData.to_json}}"
+      new_field_data = {}
+      if @configuration.translations.keys.empty?
+        create_translations
+      end
+      fieldData.keys.each do |k|
+        if @configuration.translations.keys.include?(k.to_s)
+          new_field_data.merge!({"#{@configuration.translations[k.to_s]}" => fieldData[k]})
+        else
+          new_field_data.merge!({"#{k}" => fieldData[k]})
+        end
+      end
+      body = "{\"fieldData\": #{new_field_data.to_json}}"
       response = Request.make_request(url, "Bearer #{Request.get_token}", "post", body)
       if response["messages"][0]["code"] != "0"
         Error.throw_error(response["messages"][0]["code"])
@@ -66,7 +86,18 @@ module Trophonius
     #   Model.where(fieldOne: "Data")
     def self.where(fieldData)
       url = URI("http#{Trophonius.config.ssl == true ? "s" : ""}://#{Trophonius.config.host}/fmi/data/v1/databases/#{Trophonius.config.database}/layouts/#{self.layout_name}/_find")
-      body = {query: [fieldData], limit:"100000"}.to_json
+      new_field_data = {}
+      if @configuration.translations.keys.empty?
+        create_translations
+      end
+      fieldData.keys.each do |k|
+        if @configuration.translations.keys.include?(k.to_s)
+          new_field_data.merge!({"#{@configuration.translations[k.to_s]}" => fieldData[k]})
+        else
+          new_field_data.merge!({"#{k}" => fieldData[k]})
+        end
+      end
+      body = {query: [new_field_data], limit:"100000"}.to_json
       response = Request.make_request(url, "Bearer #{Request.get_token}", "post", body)
       if response["messages"][0]["code"] != "0"
         return RecordSet.new(self.layout_name, self.non_modifiable_fields) if response["messages"][0]["code"] == "101" || response["messages"][0]["code"] == "401"
@@ -125,10 +156,21 @@ module Trophonius
     #
     # @param [Hash] fieldData: A hash containing the fields to edit and the new data to fill them with
     #
-    # @return [Boolean] True if the delete was successful 
+    # @return [Boolean] True if the delete was successful
     def self.edit(record_id, fieldData)
       url = URI("http#{Trophonius.config.ssl == true ? "s" : ""}://#{Trophonius.config.host}/fmi/data/v1/databases/#{Trophonius.config.database}/layouts/#{layout_name}/records/#{record_id}")
-      body = "{\"fieldData\": #{fieldData.to_json}}"
+      new_field_data = {}
+      if @configuration.translations.keys.empty?
+        create_translations
+      end
+      fieldData.keys.each do |k|
+        if @configuration.translations.keys.include?(k.to_s)
+          new_field_data.merge!({"#{@configuration.translations[k.to_s]}" => fieldData[k]})
+        else
+          new_field_data.merge!({"#{k}" => fieldData[k]})
+        end
+      end
+      body = "{\"fieldData\": #{new_field_data.to_json}}"
       response = Request.make_request(url, "Bearer #{Request.get_token}", "patch", body)
       if response["messages"][0]["code"] != "0"
         Error.throw_error(response["messages"][0]["code"])
@@ -149,11 +191,12 @@ module Trophonius
       hash.layout_name = layout_name
       result["fieldData"].keys.each do |key|
         # unless key[/\s/] || key[/\W/]
+        @configuration.translations.merge!({ "#{ActiveSupport::Inflector.parameterize(ActiveSupport::Inflector.underscore(key.to_s), separator: '_').downcase}" => "#{key}" })
         hash.send(:define_singleton_method, ActiveSupport::Inflector.parameterize(ActiveSupport::Inflector.underscore(key.to_s), separator: '_')) do
           hash[key]
         end
         unless non_modifiable_fields&.include?(key)
-          @all_fields.merge!(ActiveSupport::Inflector.parameterize(ActiveSupport::Inflector.underscore(key.to_s), separator: '_').downcase => ActiveSupport::Inflector.parameterize(ActiveSupport::Inflector.underscore(key.to_s), separator: '_'))
+          @configuration.all_fields.merge!(ActiveSupport::Inflector.parameterize(ActiveSupport::Inflector.underscore(key.to_s), separator: '_').downcase => ActiveSupport::Inflector.parameterize(ActiveSupport::Inflector.underscore(key.to_s), separator: '_'))
           hash.send(:define_singleton_method, "#{ActiveSupport::Inflector.parameterize(ActiveSupport::Inflector.underscore(key.to_s), separator: '_')}=") do |new_val|
             hash[key] = new_val
             hash.modifiable_fields[key] = new_val
@@ -196,7 +239,7 @@ module Trophonius
         Error.throw_error(results["messages"][0]["code"])
       else
         r_results = results["response"]["data"]
-        ret_val = r_results.empty? ? Trophonius::Record.new({}) : build_result(r_results[0])
+        ret_val = r_results.empty? ? Trophonius::Record.new() : build_result(r_results[0])
         ret_val.send(:define_singleton_method, "result_count") do
           r_results.empty? ? 0 : 1
         end

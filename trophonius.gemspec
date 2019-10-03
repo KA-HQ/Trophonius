@@ -1,9 +1,9 @@
 Gem::Specification.new do |s|
   s.name = %q{trophonius}
-  s.version = '1.0.3'
+  s.version = '1.0.4'
   s.authors = 'Kempen Automatisering'
   s.homepage = %q{https://github.com/Willem-Jan/Trophonius}
-  s.date = %q{2018-11-13}
+  s.date = %q{2019-10-3}
   s.summary = %q{Link between Ruby (on Rails) and FileMaker.}
   s.description = %q{An easy to use link between Ruby (on Rails) and FileMaker using the FileMaker Data-API.}
   s.files = Dir['lib/**/*.rb']
