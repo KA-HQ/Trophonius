@@ -7,6 +7,9 @@ module Trophonius
     config_accessor(:host) { '127.0.0.1' }
     config_accessor(:port) { 0 }
     config_accessor(:database) { '' }
+    config_accessor(:external_name) { '' }
+    config_accessor(:external_username) { '' }
+    config_accessor(:external_password) { '' }
     config_accessor(:username) { 'Admin' }
     config_accessor(:password) { '' }
     config_accessor(:ssl) { true }

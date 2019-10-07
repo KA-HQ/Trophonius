@@ -27,7 +27,7 @@ module Trophonius
       request = Typhoeus::Request.new(
         url,
         method: :post,
-        body: {},
+        body: Trophonius.config.external_name.empty? ? {} : { fmDataSource: [ { database: Trophonius.config.external_name , username: Trophonius.config.external_username, password: Trophonius.config.external_password } ] }.to_json,
         params: {},
         ssl_verifyhost: ssl_verifyhost,
         ssl_verifypeer: ssl_verifypeer,
