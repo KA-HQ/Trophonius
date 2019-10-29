@@ -220,7 +220,7 @@ module Trophonius
             inner_method = ActiveSupport::Inflector.parameterize(ActiveSupport::Inflector.underscore(inner_key.gsub(/\w+::/, "").to_s), separator: '_')
             unless inner_method[/\s/] || inner_method[/\W/]
               inner_hash.send(:define_singleton_method, inner_method.to_s) { inner_hash[inner_key] }
-              inner_hash.send(:define_singleton_method, "id") { inner_hash["recordId"] }
+              inner_hash.send(:define_singleton_method, "record_id") { inner_hash["recordId"] }
             end
           end
         end
