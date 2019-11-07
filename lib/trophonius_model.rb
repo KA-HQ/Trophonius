@@ -187,7 +187,7 @@ module Trophonius
     # @return [Record] A Record with singleton_methods for the fields where possible
     def self.build_result(result)
       hash = Trophonius::Record.new()
-      hash.id = result["recordId"]
+      hash.record_id = result["recordId"]
       hash.layout_name = layout_name
       result["fieldData"].keys.each do |key|
         # unless key[/\s/] || key[/\W/]

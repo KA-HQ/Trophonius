@@ -6,7 +6,7 @@ module Trophonius
   #
   # A Record is contained in a RecordSet and has methods to retrieve data from the fields inside the Record-hash
   class Trophonius::Record < Hash
-    attr_accessor :id, :layout_name, :modifiable_fields, :modified_fields
+    attr_accessor :record_id, :layout_name, :modifiable_fields, :modified_fields
 
     ##
     # Initializes a new Record
@@ -26,7 +26,7 @@ module Trophonius
     #
     # @return [True] if successful
     def save
-      url = URI("http#{Trophonius.config.ssl == true ? 's' : ''}://#{Trophonius.config.host}/fmi/data/v1/databases/#{Trophonius.config.database}/layouts/#{layout_name}/records/#{id}")
+      url = URI("http#{Trophonius.config.ssl == true ? 's' : ''}://#{Trophonius.config.host}/fmi/data/v1/databases/#{Trophonius.config.database}/layouts/#{layout_name}/records/#{record_id}")
       body = "{\"fieldData\": #{modified_fields.to_json}}"
       response = Request.make_request(url, "Bearer #{Request.get_token}", 'patch', body)
       if response['messages'][0]['code'] != '0'
@@ -42,7 +42,7 @@ module Trophonius
     #
     # @return [True] if successful
     def delete
-      url = URI("http#{Trophonius.config.ssl == true ? 's' : ''}://#{Trophonius.config.host}/fmi/data/v1/databases/#{Trophonius.config.database}/layouts/#{layout_name}/records/#{id}")
+      url = URI("http#{Trophonius.config.ssl == true ? 's' : ''}://#{Trophonius.config.host}/fmi/data/v1/databases/#{Trophonius.config.database}/layouts/#{layout_name}/records/#{record_id}")
       response = Request.make_request(url, "Bearer #{Request.get_token}", 'delete', '{}')
       if response['messages'][0]['code'] != '0'
         Error.throw_error(response['messages'][0]['code'])
@@ -59,7 +59,7 @@ module Trophonius
     #
     # @return [True] if successful
     def update(fieldData)
-      url = URI("http#{Trophonius.config.ssl == true ? 's' : ''}://#{Trophonius.config.host}/fmi/data/v1/databases/#{Trophonius.config.database}/layouts/#{layout_name}/records/#{id}")
+      url = URI("http#{Trophonius.config.ssl == true ? 's' : ''}://#{Trophonius.config.host}/fmi/data/v1/databases/#{Trophonius.config.database}/layouts/#{layout_name}/records/#{record_id}")
       fieldData.keys.each do |field|
         modifiable_fields[field] = fieldData[field]
       end
