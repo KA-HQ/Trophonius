@@ -14,6 +14,6 @@ Gem::Specification.new do |s|
   s.add_runtime_dependency 'redis', '~> 3.0'
   s.add_runtime_dependency 'activesupport', '~> 5.2'
 
-  s.add_development_dependency 'solargraph', '~> 0.32', ">= 0.32.0"
+  # s.add_development_dependency 'solargraph', '~> 0.32', ">= 0.32.0"
 
 end
