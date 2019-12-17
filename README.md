@@ -92,10 +92,23 @@ If you want a more restricted set of records or a specific record you might want
 
 ```ruby
   record = MyModel.find(100) # Record with recordID 100 (if available)
-  MyModel.where(number_field: 100) # Records where NumberField is 100 (if any)
+  MyModel.where(number_field: 100).to_a # Records where NumberField is 100 (if any)
   record.portal.each do |portal_record|
     portal_record.child_field
   end
+```
+
+### Omit records
+
+If you want to find records without the specified query you can use the "not" method. This method will add an omit find request to the query. If the query gets executed, FileMaker will return the records where the condition does not hold.
+```ruby
+  MyModel.not(number_field: 100).to_a # Records where NumberField is not 100 (if any)
+```
+
+### Or find request
+
+```ruby
+  MyModel.where(number_field: 100).or(number_field: 101).to_a # Records where NumberField is 100 or 101 (if any)
 ```
 
 ## Update records
@@ -132,7 +145,9 @@ To run a FileMaker script from the context of a model you can call the run_scrip
 
 - [x] Better portal support (get supported)
 - [ ] Support portal set field directly
-- [ ] Better chainable where queries
+- [x] Better chainable where queries
+- [x] Omit queries
+- [x] Or queries
 - [ ] Store token in Redis
 - [ ] More container support
 - [x] Remove non_modifiable_fields requirement from Model

@@ -4,6 +4,7 @@ require 'trophonius_config'
 
 module Trophonius # :nodoc:
   def self.configuration
+    Ethon.logger = Logger.new(nil)
     @configuration ||= Configuration.new
   end
 
