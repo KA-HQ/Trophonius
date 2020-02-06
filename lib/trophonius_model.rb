@@ -2,14 +2,21 @@ require "json"
 require "trophonius_config"
 require "trophonius_record"
 require "trophonius_recordset"
+require "trophonius_query"
 require "trophonius_error"
 
 module Trophonius
   # This class will retrieve the records from the FileMaker database and build a RecordSet filled with Record objects. One Record object represents a record in FileMaker.
   class Trophonius::Model
+    attr_reader :configuration
+    attr_accessor :current_query
+
+    def initialize(config:)
+      @configuration = config
+    end
 
     ##
-    # Sets up the configuration for the model. 
+    # Sets up the configuration for the model.
     #
     # @param [Hash] configuration: the hash containing the config to setup the model correctly.
     #   configuration = {layout_name: "theFileMakerLayoutForThisModel", non_modifiable_fields: ["an", "array", "containing", "calculation_fields", "etc."]}
@@ -23,29 +30,83 @@ module Trophonius
 
     ##
     # Returns the FileMaker layout this Model corresponds to
+    #
+    # @return [String] layout name of the model
     def self.layout_name
       @configuration.layout_name
     end
-    
+
     ##
     # Returns the fields that FileMaker won't allow us to modify
+    #
+    # @return [[Array]] fields that FileMaker won't allow us to modify
     def self.non_modifiable_fields
       @configuration.non_modifiable_fields
     end
 
     ##
     # Returns the translations of the fields
+    #
+    # @return [Hash] translations of the fields Rails -> FileMaker
     def self.translations
       @configuration.translations
     end
-    
+
+    ##
+    # creates Rails -> FileMaker field translations by requesting the first record
+    #
+    # @return [Hash] translations of the fields Rails -> FileMaker
     def self.create_translations
       self.first
+      @configuration.translations
+    end
+    
+    def self.method_missing(method, *args, &block)
+      new_instance = Trophonius::Model.new(config: @configuration)
+      new_instance.current_query = Trophonius::Query.new(trophonius_model: self)
+      # new_instance.current_query.build_query[0].merge!(fieldData)
+      args << new_instance
+      if new_instance.current_query.respond_to?(method)        
+        new_instance.current_query.send(method, args)
+      end
+    end
+
+    def method_missing(method, *args, &block)
+      if @current_query.respond_to?(method)
+        args << self
+        @current_query.send(method, args)
+      elsif @current_query.response.respond_to?(method)
+        @current_query.run_query(method, *args, &block)
+      end
+    end
+
+    ##
+    # Finds all records in FileMaker corresponding to the requested query
+    # @param [Hash] fieldData: the data to find
+    #
+    # @return [Trophonius::Model] new instance of the model
+    def self.where(fieldData)
+      new_instance = Trophonius::Model.new(config: @configuration)
+      new_instance.current_query = Trophonius::Query.new(trophonius_model: self)
+      new_instance.current_query.build_query[0].merge!(fieldData)
+      new_instance
+    end
+
+    ##
+    # Finds all records in FileMaker corresponding to the requested query
+    # This method is created to enable where chaining
+    #
+    # @param [Hash] fieldData: the data to find
+    #
+    # @return [Trophonius::Model] new instance of the model
+    def where(fieldData)
+      @current_query.build_query[0].merge!(fieldData)
+      self
     end
 
     ##
     # Creates and saves a record in FileMaker
-    # 
+    #
     # @param [Hash] fieldData: the fields to fill with the data
     #
     # @return [Record] the created record
@@ -76,16 +137,16 @@ module Trophonius
         return ret_val
       end
     end
-    
+
     ##
-    # Finds and returns a RecordSet containing the records fitting the find request
-    # 
+    # Finds and returns the first Record containing fitting the find request
+    #
     # @param [Hash] fieldData: the data to find
     #
-    # @return [RecordSet] a RecordSet containing all the Record objects that correspond to FileMaker records fitting the find request
-    #   Model.where(fieldOne: "Data")
-    def self.where(fieldData)
-      url = URI("http#{Trophonius.config.ssl == true ? "s" : ""}://#{Trophonius.config.host}/fmi/data/v1/databases/#{Trophonius.config.database}/layouts/#{self.layout_name}/_find")
+    # @return [Record] a Record object that correspond to FileMaker record fitting the find request
+    #   Model.find_by(fieldOne: "Data")
+    def self.find_by(fieldData)
+      url = URI("http#{Trophonius.config.ssl == true ? "s" : ""}://#{Trophonius.config.host}/fmi/data/v1/databases/#{Trophonius.config.database}/layouts/#{self.layout_name}/_find?_limit=1")
       new_field_data = {}
       if @configuration.translations.keys.empty?
         create_translations
@@ -109,15 +170,15 @@ module Trophonius
           hash = build_result(r)
           ret_val << hash
         end
-        return ret_val
+        return ret_val.first
       end
     end
 
     ##
     # Finds and returns a Record corresponding to the record_id
-    # 
+    #
     # @param [Integer] record_id: the record id to retrieve from FileMaker
-    # 
+    #
     # @return [Record] the record
     def self.find(record_id)
       url = URI("http#{Trophonius.config.ssl == true ? "s" : ""}://#{Trophonius.config.host}/fmi/data/v1/databases/#{Trophonius.config.database}/layouts/#{layout_name}/records/#{record_id}")
@@ -135,10 +196,10 @@ module Trophonius
 
     ##
     # Deletes a record from FileMaker
-    # 
+    #
     # @param [Integer] record_id: the record id to retrieve from FileMaker
     #
-    # @return [Boolean] True if the delete was successful 
+    # @return [Boolean] True if the delete was successful
     def self.delete(record_id)
       url = URI("http#{Trophonius.config.ssl == true ? "s" : ""}://#{Trophonius.config.host}/fmi/data/v1/databases/#{Trophonius.config.database}/layouts/#{layout_name}/records/#{record_id}")
       response = Request.make_request(url, "Bearer #{Request.get_token}", "delete", "{}")
@@ -151,7 +212,7 @@ module Trophonius
 
     ##
     # Edits a record in FileMaker
-    # 
+    #
     # @param [Integer] record_id: the record id to edit in FileMaker
     #
     # @param [Hash] fieldData: A hash containing the fields to edit and the new data to fill them with
@@ -181,13 +242,13 @@ module Trophonius
 
     ##
     # Builds the resulting Record
-    # 
+    #
     # @param [JSON] result: the HTTP result from FileMaker
     #
     # @return [Record] A Record with singleton_methods for the fields where possible
     def self.build_result(result)
       hash = Trophonius::Record.new()
-      hash.id = result["recordId"]
+      hash.record_id = result["recordId"]
       hash.layout_name = layout_name
       result["fieldData"].keys.each do |key|
         # unless key[/\s/] || key[/\W/]
@@ -250,7 +311,7 @@ module Trophonius
     ##
     # Runs a FileMaker script from the context of the Model.
     #
-    # @param [String] script: the FileMaker script to run 
+    # @param [String] script: the FileMaker script to run
     #
     # @param [String] scriptparameter: the parameter required by the FileMaker script
     #
@@ -270,7 +331,7 @@ module Trophonius
     ##
     # Retrieve the first 10000000 records from FileMaker from the context of the Model.
     #
-    # @param [Hash] sort: a hash containing the fields to sort by and the direction to sort in (optional) 
+    # @param [Hash] sort: a hash containing the fields to sort by and the direction to sort in (optional)
     #
     # @return [RecordSet]: a RecordSet containing all the Record objects that correspond to the FileMaker records.
     def self.all(sort: {})
