@@ -51,7 +51,7 @@ module Trophonius
     #
     # @return [RecordSet] the records in the range ((page * records_per_page) - records_per_page) + 1 until ((page * records_per_page) - records_per_page) + 1 + records_per_page
     def paginate(page, records_per_page)
-      offset = ((page * records_per_page) - records_per_page) + 1
+      offset = ((page * records_per_page) - records_per_page)
       records[offset...offset + records_per_page]
     end
   end
