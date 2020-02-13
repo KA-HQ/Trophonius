@@ -13,6 +13,8 @@ module Trophonius
 
     def initialize(config:)
       @configuration = config
+      @offset = ""
+      @limit = ""
     end
 
     ##
@@ -26,6 +28,19 @@ module Trophonius
       @configuration.non_modifiable_fields = configuration[:non_modifiable_fields]
       @configuration.all_fields = {}
       @configuration.translations = {}
+    end
+
+    ##
+    # Limits the found record set.
+    #
+    # @param [Integer] page: number of current page
+    # @param [Integer] limit: number of records retreived
+    #
+    # @return [Trophonius::Model] Self
+    def self.paginate(page, limit)
+      @offset = ((page * limit - limit) + 1).to_s
+      @limit = limit.to_s
+      self
     end
 
     ##
@@ -60,13 +75,13 @@ module Trophonius
       self.first
       @configuration.translations
     end
-    
+
     def self.method_missing(method, *args, &block)
       new_instance = Trophonius::Model.new(config: @configuration)
-      new_instance.current_query = Trophonius::Query.new(trophonius_model: self)
+      new_instance.current_query = Trophonius::Query.new(trophonius_model: self, limit: @limit, offset: @offset )
       # new_instance.current_query.build_query[0].merge!(fieldData)
       args << new_instance
-      if new_instance.current_query.respond_to?(method)        
+      if new_instance.current_query.respond_to?(method)
         new_instance.current_query.send(method, args)
       end
     end
@@ -76,7 +91,10 @@ module Trophonius
         args << self
         @current_query.send(method, args)
       elsif @current_query.response.respond_to?(method)
-        @current_query.run_query(method, *args, &block)
+        ret_val = @current_query.run_query(method, *args, &block)
+        @limit = ''
+        @offset = ''
+        return ret_val
       end
     end
 
@@ -87,7 +105,7 @@ module Trophonius
     # @return [Trophonius::Model] new instance of the model
     def self.where(fieldData)
       new_instance = Trophonius::Model.new(config: @configuration)
-      new_instance.current_query = Trophonius::Query.new(trophonius_model: self)
+      new_instance.current_query = Trophonius::Query.new(trophonius_model: self, limit: @limit, offset: @offset )
       new_instance.current_query.build_query[0].merge!(fieldData)
       new_instance
     end
@@ -337,7 +355,13 @@ module Trophonius
     def self.all(sort: {})
       results = Request.retrieve_all(layout_name, sort)
       count = results["response"]["scriptResult"].to_i
-      url = URI("http#{Trophonius.config.ssl == true ? "s" : ""}://#{Trophonius.config.host}/fmi/data/v1/databases/#{Trophonius.config.database}/layouts/#{layout_name}/records?_limit=#{count == 0 ? 1000000 : count}")
+      unless @limit.empty? || @offset.empty?
+        url = URI("http#{Trophonius.config.ssl == true ? "s" : ""}://#{Trophonius.config.host}/fmi/data/v1/databases/#{Trophonius.config.database}/layouts/#{layout_name}/records?_offset=#{@offset}&_limit=#{@limit}")
+      else
+        url = URI("http#{Trophonius.config.ssl == true ? "s" : ""}://#{Trophonius.config.host}/fmi/data/v1/databases/#{Trophonius.config.database}/layouts/#{layout_name}/records?_limit=#{count == 0 ? 1000000 : count}")
+      end
+      @limit = ''
+      @offset = ''
       results = Request.make_request(url, "Bearer #{Request.get_token}", "get", "{}")
       if results["messages"][0]["code"] != "0"
         Error.throw_error(results["messages"][0]["code"])

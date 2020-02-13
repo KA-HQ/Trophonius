@@ -10,12 +10,16 @@ module Trophonius
 
     ##
     # Creates a new instance of the Trophonius::Query class
-    # 
-    # @param [Trophonius::Model] base model for the new query
+    #
+    # @param [Trophonius::Model] trophonius_model: base model for the new query
+    # @param [String] limit: 
+    # @param [String] offset: 
     # @return [Trophonius::Query] new instance of Trophonius::Query
-    def initialize(trophonius_model:)
+    def initialize(trophonius_model:, limit:, offset:)
       @response = RecordSet.new(trophonius_model.layout_name, trophonius_model.non_modifiable_fields)
       @trophonius_model = trophonius_model
+      @limit = limit
+      @offset = offset
     end
 
     ##
@@ -29,7 +33,7 @@ module Trophonius
     def inspect
       @current_query
     end
-    
+
     ##
     # Adds a find request to the original query, resulting in an "Or" find-request for FileMaker
     #
@@ -39,7 +43,7 @@ module Trophonius
       args[1].current_query.build_query << args[0]
       args[1]
     end
-    
+
     ##
     # Adds an omit request to the original query, resulting in an "omit" find for FileMaker
     #
@@ -49,7 +53,7 @@ module Trophonius
       args[1].current_query.build_query << args[0].merge!({omit: true})
       args[1]
     end
-    
+
     ##
     # Performs the query in FileMaker
     #
@@ -57,7 +61,7 @@ module Trophonius
     # @param [*args] original arguments, will be passed to the method call
     # @param [&block] original block, will be passed to the method call
     #
-    # @return Response of the called method 
+    # @return Response of the called method
     def run_query(method, *args, &block)
       url = URI("http#{Trophonius.config.ssl == true ? "s" : ""}://#{Trophonius.config.host}/fmi/data/v1/databases/#{Trophonius.config.database}/layouts/#{@trophonius_model.layout_name}/_find")
       new_field_data = @current_query.map { |q| {} }
@@ -73,7 +77,11 @@ module Trophonius
           end
         end
       end
-      body = {query: new_field_data, limit:"100000"}.to_json
+      unless @offset.empty? || @limit.empty?
+        body = {query: new_field_data, limit:"#{@limit}", offset:"#{@offset}"}.to_json
+      else
+        body = {query: new_field_data, limit:"100000"}.to_json
+      end
       response = Request.make_request(url, "Bearer #{Request.get_token}", "post", body)
       if response["messages"][0]["code"] != "0"
         if response["messages"][0]["code"] == "101" || response["messages"][0]["code"] == "401"
@@ -93,7 +101,7 @@ module Trophonius
         return @response.send(method, *args, &block)
       end
     end
-    
+
     alias_method :to_s, :inspect
   end
 end
