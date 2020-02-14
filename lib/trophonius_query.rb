@@ -1,8 +1,8 @@
-require "json"
-require "trophonius_config"
-require "trophonius_record"
-require "trophonius_recordset"
-require "trophonius_error"
+require 'json'
+require 'trophonius_config'
+require 'trophonius_record'
+require 'trophonius_recordset'
+require 'trophonius_error'
 
 module Trophonius
   class Trophonius::Query
@@ -12,8 +12,8 @@ module Trophonius
     # Creates a new instance of the Trophonius::Query class
     #
     # @param [Trophonius::Model] trophonius_model: base model for the new query
-    # @param [String] limit: 
-    # @param [String] offset: 
+    # @param [String] limit:
+    # @param [String] offset:
     # @return [Trophonius::Query] new instance of Trophonius::Query
     def initialize(trophonius_model:, limit:, offset:)
       @response = RecordSet.new(trophonius_model.layout_name, trophonius_model.non_modifiable_fields)
@@ -50,7 +50,7 @@ module Trophonius
     # @param [args] arguments containing a Hash containing the FileMaker omit request, and the base model object for the query
     # @return [Trophonius::Model] updated base model
     def not(args)
-      args[1].current_query.build_query << args[0].merge!({omit: true})
+      args[1].current_query.build_query << args[0].merge!(omit: true)
       args[1]
     end
 
@@ -63,35 +63,35 @@ module Trophonius
     #
     # @return Response of the called method
     def run_query(method, *args, &block)
-      url = URI("http#{Trophonius.config.ssl == true ? "s" : ""}://#{Trophonius.config.host}/fmi/data/v1/databases/#{Trophonius.config.database}/layouts/#{@trophonius_model.layout_name}/_find")
-      new_field_data = @current_query.map { |q| {} }
+      url = URI("http#{Trophonius.config.ssl == true ? 's' : ''}://#{Trophonius.config.host}/fmi/data/v1/databases/#{Trophonius.config.database}/layouts/#{@trophonius_model.layout_name}/_find")
+      new_field_data = @current_query.map { |_q| {} }
       if @trophonius_model.translations.keys.empty?
         @trophonius_model.create_translations
       end
       @current_query.each_with_index do |query, index|
         query.keys.each do |k|
-          if @trophonius_model.translations.keys.include?(k.to_s)
-            new_field_data[index].merge!({"#{@trophonius_model.translations[k.to_s]}" => query[k].to_s})
+          if @trophonius_model.translations.key?(k.to_s)
+            new_field_data[index].merge!(@trophonius_model.translations[k.to_s].to_s => query[k].to_s)
           else
-            new_field_data[index].merge!({"#{k}" => query[k].to_s})
+            new_field_data[index].merge!(k.to_s => query[k].to_s)
           end
         end
       end
-      unless @offset.empty? || @limit.empty?
-        body = {query: new_field_data, limit:"#{@limit}", offset:"#{@offset}"}.to_json
+      if @offset.empty? || @limit.empty?
+        body = { query: new_field_data, limit: '100000' }.to_json
       else
-        body = {query: new_field_data, limit:"100000"}.to_json
+        body = { query: new_field_data, limit: @limit.to_s, offset: @offset.to_s }.to_json
       end
-      response = Request.make_request(url, "Bearer #{Request.get_token}", "post", body)
-      if response["messages"][0]["code"] != "0"
-        if response["messages"][0]["code"] == "101" || response["messages"][0]["code"] == "401"
+      response = Request.make_request(url, "Bearer #{Request.get_token}", 'post', body)
+      if response['messages'][0]['code'] != '0'
+        if response['messages'][0]['code'] == '101' || response['messages'][0]['code'] == '401'
           RecordSet.new(@trophonius_model.layout_name, @trophonius_model.non_modifiable_fields).send(method, *args, &block)
           return
         else
-          Error.throw_error(response["messages"][0]["code"])
+          Error.throw_error(response['messages'][0]['code'])
         end
       else
-        r_results = response["response"]["data"]
+        r_results = response['response']['data']
         ret_val = RecordSet.new(@trophonius_model.layout_name, @trophonius_model.non_modifiable_fields)
         r_results.each do |r|
           hash = @trophonius_model.build_result(r)
@@ -102,6 +102,6 @@ module Trophonius
       end
     end
 
-    alias_method :to_s, :inspect
+    alias to_s inspect
   end
 end

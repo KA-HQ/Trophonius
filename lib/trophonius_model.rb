@@ -79,7 +79,6 @@ module Trophonius
     def self.method_missing(method, *args, &block)
       new_instance = Trophonius::Model.new(config: @configuration)
       new_instance.current_query = Trophonius::Query.new(trophonius_model: self, limit: @limit, offset: @offset )
-      # new_instance.current_query.build_query[0].merge!(fieldData)
       args << new_instance
       if new_instance.current_query.respond_to?(method)
         new_instance.current_query.send(method, args)
