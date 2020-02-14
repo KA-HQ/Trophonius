@@ -12,8 +12,8 @@ module Trophonius
     # Creates a new instance of the Trophonius::Query class
     #
     # @param [Trophonius::Model] trophonius_model: base model for the new query
-    # @param [String] limit:
-    # @param [String] offset:
+    # @param [String] limit: Used for every query to set the limit
+    # @param [String] offset: Used for every query to set the offset
     # @return [Trophonius::Query] new instance of Trophonius::Query
     def initialize(trophonius_model:, limit:, offset:)
       @response = RecordSet.new(trophonius_model.layout_name, trophonius_model.non_modifiable_fields)
