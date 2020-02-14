@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name = %q{trophonius}
-  s.version = '1.1.1'
+  s.version = '1.1.2'
   s.authors = 'Kempen Automatisering'
   s.homepage = %q{https://github.com/Willem-Jan/Trophonius}
   s.date = %q{2019-12-16}
