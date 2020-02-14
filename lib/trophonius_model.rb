@@ -16,7 +16,7 @@ module Trophonius
       @offset = ""
       @limit = ""
     end
-
+    
     ##
     # Sets up the configuration for the model.
     #
@@ -28,6 +28,8 @@ module Trophonius
       @configuration.non_modifiable_fields = configuration[:non_modifiable_fields]
       @configuration.all_fields = {}
       @configuration.translations = {}
+      @offset = ""
+      @limit = ""
     end
 
     ##
