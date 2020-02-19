@@ -77,7 +77,7 @@ To create a new record in the FileMaker database you only have to call the creat
   MyModel.create(field_one: "Data", number_field: 1)
 ```
 
-The new record will be created immediately and filled with the provided data. The fieldnames are the same as the names in FileMaker. If the fieldname in FileMaker contains non-word characters, the fieldname should be in quotes.
+The new record will be created immediately and filled with the provided data. The fieldnames are the same as the names in FileMaker. If the fieldname in FileMaker contains non-word characters, the fieldname should be in quotes. This method returns the created record as a Trophonius::Record instance.
 
 ## Get records
 
