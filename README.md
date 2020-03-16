@@ -138,7 +138,7 @@ Deleting a record is as simple as finding the record to delete and calling the d
 To run a FileMaker script from the context of a model you can call the run_script method. This method accepts an optional script_parameter required by the FileMaker script. The method returns the script result, set by the Exit Script script step in FileMaker.
 
 ```ruby
-  MyModel.run_script(script: "My Awesome Script", script_parameter: "ScriptParameter") #the script parameter is optional
+  MyModel.run_script(script: "My Awesome Script", scriptparameter: "ScriptParameter") #the script parameter is optional
 ```
 
 # To do
