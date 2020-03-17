@@ -1,6 +1,8 @@
+# frozen_string_literal: true
+
 Gem::Specification.new do |s|
   s.name = 'trophonius'
-  s.version = '1.1.3'
+  s.version = '1.1.4'
   s.authors = 'Kempen Automatisering'
   s.homepage = 'https://github.com/Willem-Jan/Trophonius'
   s.date = '2019-12-16'
