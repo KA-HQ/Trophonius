@@ -1,5 +1,9 @@
+# frozen_string_literal: true
+
 require 'base64'
 require 'trophonius_connection'
+require 'uri'
+require 'net/http'
 
 module Trophonius
   module Trophonius::Request
@@ -32,6 +36,35 @@ module Trophonius
       temp = request.run
       begin
         JSON.parse(temp.response_body)
+      rescue Exception
+        Error.throw_error('1631')
+      end
+    end
+
+    ##
+    # Crafts and runs a HTTP request for uploading a file to a container
+    #
+    # @param [URI] urlparam: the url to make the request to
+    #
+    # @param [String] auth: the authentication required for the request
+    #
+    # @param [Tempfile or File] file: file to upload
+    #
+    # @return [JSON] parsed json of the response
+    def self.upload_file_request(url_param, auth, file)
+      url = URI(url_param)
+
+      https = Net::HTTP.new(url.host, url.port)
+      https.use_ssl = true
+
+      request = Net::HTTP::Post.new(url)
+      request['Authorization'] = auth.to_s
+      request['Content-Type'] = 'multipart/form-data;'
+      form_data = [['upload', file]]
+      request.set_form form_data, 'multipart/form-data'
+      response = https.request(request)
+      begin
+        JSON.parse(response.read_body)
       rescue Exception
         Error.throw_error('1631')
       end

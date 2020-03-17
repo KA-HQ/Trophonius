@@ -27,7 +27,7 @@ module Trophonius
       request = Typhoeus::Request.new(
         url,
         method: :post,
-        body: Trophonius.config.external_name.empty? ? {} : { fmDataSource: [ { database: Trophonius.config.external_name , username: Trophonius.config.external_username, password: Trophonius.config.external_password } ] }.to_json,
+        body: Trophonius.config.external_name.empty? ? {} : { fmDataSource: [{ database: Trophonius.config.external_name, username: Trophonius.config.external_username, password: Trophonius.config.external_password }] }.to_json,
         params: {},
         ssl_verifyhost: ssl_verifyhost,
         ssl_verifypeer: ssl_verifypeer,
@@ -84,7 +84,11 @@ module Trophonius
     # Returns whether the current connection is still valid
     # @return [Boolean] True if the connection is valid False if invalid
     def self.valid_connection?
-      @last_connection.nil? ? false : (((Time.now - last_connection) / 60).round <= 15 || test_connection)
+      if test_connection == false
+        false
+      else
+        @last_connection.nil? ? false : (((Time.now - last_connection) / 60).round <= 15 || test_connection)
+      end
     end
   end
 end

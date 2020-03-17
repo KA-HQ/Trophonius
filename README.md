@@ -101,6 +101,7 @@ If you want a more restricted set of records or a specific record you might want
 ### Omit records
 
 If you want to find records without the specified query you can use the "not" method. This method will add an omit find request to the query. If the query gets executed, FileMaker will return the records where the condition does not hold.
+
 ```ruby
   MyModel.not(number_field: 100).to_a # Records where NumberField is not 100 (if any)
 ```
@@ -124,6 +125,15 @@ Once all fields are set, run the save method to store the new data in FileMaker.
   record.save
 ```
 
+## Uploading a file to a container
+
+To upload a file to a container field you can use the upload method on a record.
+
+```ruby
+  record = MyModel.find(100) # or use MyModel.where and loop over the RecordSet
+  record.upload(container_name: 'MyContainerField', container_repetition: )
+```
+
 ## Delete records
 
 Deleting a record is as simple as finding the record to delete and calling the delete method:
@@ -135,7 +145,7 @@ Deleting a record is as simple as finding the record to delete and calling the d
 
 ## Running a script
 
-To run a FileMaker script from the context of a model you can call the run_script method. This method accepts an optional script_parameter required by the FileMaker script. The method returns the script result, set by the Exit Script script step in FileMaker.
+To run a FileMaker script from the context of a model you can call the run_script method. This method accepts an optional scriptparameter required by the FileMaker script. The method returns the script result, set by the Exit Script script step in FileMaker.
 
 ```ruby
   MyModel.run_script(script: "My Awesome Script", scriptparameter: "ScriptParameter") #the script parameter is optional
@@ -149,7 +159,7 @@ To run a FileMaker script from the context of a model you can call the run_scrip
 - [x] Omit queries
 - [x] Or queries
 - [ ] Store token in Redis
-- [ ] More container support
+- [x] More container support
 - [x] Remove non_modifiable_fields requirement from Model
 
 # Contributing

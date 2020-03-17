@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'json'
 require 'trophonius_config'
 
@@ -32,7 +34,7 @@ module Trophonius
       if response['messages'][0]['code'] != '0'
         Error.throw_error(response['messages'][0]['code'])
       else
-        return true
+        true
       end
     end
 
@@ -47,7 +49,7 @@ module Trophonius
       if response['messages'][0]['code'] != '0'
         Error.throw_error(response['messages'][0]['code'])
       else
-        return true
+        true
       end
     end
 
@@ -68,7 +70,27 @@ module Trophonius
       if response['messages'][0]['code'] != '0'
         Error.throw_error(response['messages'][0]['code'])
       else
-        return true
+        true
+      end
+    end
+
+    ##
+    # Uploads a file to a container field of the record
+    # Throws a FileMaker error if upload failed
+    #
+    # @param [String] container_name: Case sensitive name of the container field on the layout
+    # @param [Integer] container_repetition: Number of the repetition of the container field to set
+    # @param [Tempfile or File] file: File to upload
+    #
+    # @return [True] if successful
+    def upload(container_name:, container_repetition: 1, file:)
+      url = URI("http#{Trophonius.config.ssl == true ? 's' : ''}://#{Trophonius.config.host}/fmi/data/v1/databases/#{Trophonius.config.database}/layouts/#{layout_name}/records/#{record_id}/containers/#{container_name}/#{container_repetition}")
+
+      response = Request.upload_file_request(url, "Bearer #{Request.get_token}", file)
+      if response['messages'][0]['code'] != '0'
+        Error.throw_error(response['messages'][0]['code'])
+      else
+        true
       end
     end
   end
