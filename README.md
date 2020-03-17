@@ -127,11 +127,11 @@ Once all fields are set, run the save method to store the new data in FileMaker.
 
 ## Uploading a file to a container
 
-To upload a file to a container field you can use the upload method on a record.
+To upload a file to a container field you can use the upload method on a record. The first parameter, container_name, requires a string containing the name of the container field in filemaker, this process is case sensitive so containerfield ≠ ContainerField. The second parameter is the repetition of the container field (default value is 1). The third parameter, file, is the actual File or Tempfile object you want to upload to your container.
 
 ```ruby
   record = MyModel.find(100) # or use MyModel.where and loop over the RecordSet
-  record.upload(container_name: 'MyContainerField', container_repetition: )
+  record.upload(container_name: 'MyContainerField', container_repetition: 1, file: params[:uploaded_file].tempfile)
 ```
 
 ## Delete records
