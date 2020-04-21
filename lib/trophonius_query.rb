@@ -88,6 +88,17 @@ module Trophonius
           RecordSet.new(@trophonius_model.layout_name, @trophonius_model.non_modifiable_fields).send(method, *args, &block)
           return
         else
+          if response["messages"][0]["code"] == "102"
+            results = Request.retrieve_first(@trophonius_model.layout_name)
+            if results["messages"][0]["code"] != "0"
+              Error.throw_error("102")
+            else
+              r_results = results["response"]["data"]
+              ret_val = r_results.empty? ? Error.throw_error("102") : r_results[0]['fieldData']
+              query_keys = new_field_data.map { |q| q.keys.map(&:downcase) }.uniq
+              Error.throw_error("102", (query_keys - ret_val.keys.map(&:downcase)).flatten.join(', '), @trophonius_model.layout_name) 
+            end
+          end
           Error.throw_error(response['messages'][0]['code'])
         end
       else

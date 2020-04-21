@@ -68,7 +68,17 @@ module Trophonius
       body = "{\"fieldData\": #{fieldData.to_json}}"
       response = Request.make_request(url, "Bearer #{Request.get_token}", 'patch', body)
       if response['messages'][0]['code'] != '0'
-        Error.throw_error(response['messages'][0]['code'])
+        if response["messages"][0]["code"] == "102"
+          results = Request.retrieve_first(layout_name)
+          if results["messages"][0]["code"] != "0"
+            Error.throw_error("102")
+          else
+            r_results = results["response"]["data"]
+            ret_val = r_results.empty? ? Error.throw_error("102") : r_results[0]['fieldData']
+            Error.throw_error("102", (fieldData.keys.map(&:downcase) - ret_val.keys.map(&:downcase)).flatten.join(', '), layout_name) 
+          end
+        end
+        Error.throw_error(response["messages"][0]["code"])
       else
         true
       end
