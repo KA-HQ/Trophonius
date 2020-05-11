@@ -24,7 +24,7 @@ module Trophonius
     end
 
     def self.connected?
-      @redis.connected?
+      @redis.nil? == false && @redis.connected?
     end
 
     def self.disconnect
