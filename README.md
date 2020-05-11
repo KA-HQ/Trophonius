@@ -40,6 +40,7 @@ Trophonius.configure do |config|
   config.username = "Username to Access the Database" # or Rails.application.credentials.dig(:username) (requires >= Rails 5.2)
   config.password = "Y0urAmaz1ngPa$$w0rd" # or Rails.application.credentials.dig(:password) (requires >= Rails 5.2)
   config.count_result_script = "script that can be used to count the results (optional)"
+  config.redis_connection = true # default false, true if you want to store the token in redis
   config.ssl = true # or false depending on whether https or http should be used
   # USE THE NEXT OPTION WITH CAUTION
   config.local_network = true # if true the ssl certificate will not be verified to allow for self-signed certificates
@@ -158,7 +159,7 @@ To run a FileMaker script from the context of a model you can call the run_scrip
 - [x] Better chainable where queries
 - [x] Omit queries
 - [x] Or queries
-- [ ] Store token in Redis
+- [x] Store token in Redis
 - [x] More container support
 - [x] Remove non_modifiable_fields requirement from Model
 
