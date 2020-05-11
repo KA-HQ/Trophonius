@@ -14,7 +14,9 @@ module Trophonius
         redis_manager = Trophonius::RedisManager.new
         redis_manager.set_key(key: 'token', value: setup_connection)
         redis_manager.set_key(key: 'last_connection', value: Time.now)
-        redis_manager.get_key(key: 'token')
+        token = redis_manager.get_key(key: 'token')
+        redis_manager.disconnect
+        token
       else
         @token = setup_connection
         @last_connection = Time.now
@@ -32,6 +34,7 @@ module Trophonius
         redis_manager = Trophonius::RedisManager.new
         redis_manager.set_key(key: 'token', value: '')
         redis_manager.set_key(key: 'last_connection', value: nil)
+        redis_manager.disconnect
       else
         @token = ''
       end
@@ -83,7 +86,9 @@ module Trophonius
     # @return [String] the last valid *token* used to connect with the FileMaker data api
     def self.token
       redis_manager = Trophonius::RedisManager.new
-      Trophonius.config.redis_connection ? redis_manager.get_key(key: 'token') : @token
+      token = redis_manager.get_key(key: 'token')
+      redis_manager.disconnect
+      return Trophonius.config.redis_connection ? redis_manager.get_key(key: 'token') : @token
     end
 
     ##
@@ -92,6 +97,7 @@ module Trophonius
     def self.last_connection
       redis_manager = Trophonius::RedisManager.new
       last = redis_manager.get_key(key: 'last_connection')
+      redis_manager.disconnect
       last = last.nil? ? nil : Time.parse(last)
       Trophonius.config.redis_connection ? last : @last_connection
     end

@@ -19,5 +19,6 @@ module Trophonius
     config_accessor(:all_fields) { {} }
     config_accessor(:translations) { {} }
     config_accessor(:local_network) { false }
+    config_accessor(:redis_connection) { false }
   end
 end

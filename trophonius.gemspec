@@ -2,7 +2,7 @@
 
 Gem::Specification.new do |s|
   s.name = 'trophonius'
-  s.version = '1.2.0'
+  s.version = '1.2.2'
   s.authors = 'Kempen Automatisering'
   s.homepage = 'https://github.com/Willem-Jan/Trophonius'
   s.date = '2019-12-16'
@@ -13,7 +13,7 @@ Gem::Specification.new do |s|
   s.require_paths = %w[lib]
 
   s.add_runtime_dependency 'typhoeus', '~> 1.3'
-  s.add_runtime_dependency 'redis'
+  s.add_runtime_dependency 'redis', '~> 4.0'
   s.add_runtime_dependency 'activesupport', '~> 5.2'
 
   # s.add_development_dependency 'solargraph', '~> 0.32', ">= 0.32.0"

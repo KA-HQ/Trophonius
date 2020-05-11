@@ -19,5 +19,9 @@ module Trophonius
     def set_key(key:, value:)
       @redis.set(key, value)
     end
+
+    def disconnect
+      @redis.disconnect!
+    end
   end
 end
