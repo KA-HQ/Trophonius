@@ -11,11 +11,9 @@ module Trophonius
 
     def self.connect
       if Trophonius.config.redis_connection
-        redis_manager = Trophonius::RedisManager.new
-        redis_manager.set_key(key: 'token', value: setup_connection)
-        redis_manager.set_key(key: 'last_connection', value: Time.now)
-        token = redis_manager.get_key(key: 'token')
-        redis_manager.disconnect
+        Trophonius::RedisManager.set_key(key: 'token', value: setup_connection)
+        Trophonius::RedisManager.set_key(key: 'last_connection', value: Time.now)
+        token = Trophonius::RedisManager.get_key(key: 'token')
         token
       else
         @token = setup_connection
@@ -31,10 +29,8 @@ module Trophonius
 
     def self.setup_connection
       if Trophonius.config.redis_connection
-        redis_manager = Trophonius::RedisManager.new
-        redis_manager.set_key(key: 'token', value: '')
-        redis_manager.set_key(key: 'last_connection', value: nil)
-        redis_manager.disconnect
+        Trophonius::RedisManager.set_key(key: 'token', value: '')
+        Trophonius::RedisManager.set_key(key: 'last_connection', value: nil)
       else
         @token = ''
       end
@@ -85,19 +81,15 @@ module Trophonius
     # Returns the last received token
     # @return [String] the last valid *token* used to connect with the FileMaker data api
     def self.token
-      redis_manager = Trophonius::RedisManager.new
-      token = redis_manager.get_key(key: 'token')
-      redis_manager.disconnect
-      return Trophonius.config.redis_connection ? redis_manager.get_key(key: 'token') : @token
+      token = Trophonius::RedisManager.get_key(key: 'token')
+      return Trophonius.config.redis_connection ? Trophonius::RedisManager.get_key(key: 'token') : @token
     end
 
     ##
     # Returns the receive time of the last received token
     # @return [Time] Returns the receive time of the last received token
     def self.last_connection
-      redis_manager = Trophonius::RedisManager.new
-      last = redis_manager.get_key(key: 'last_connection')
-      redis_manager.disconnect
+      last = Trophonius::RedisManager.get_key(key: 'last_connection')
       last = last.nil? ? nil : Time.parse(last)
       Trophonius.config.redis_connection ? last : @last_connection
     end

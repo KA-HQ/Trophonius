@@ -1,6 +1,6 @@
 module Trophonius
-  class Trophonius::RedisManager
-    def initialize
+  module Trophonius::RedisManager
+    def self.connect
       if ENV['REDIS_URL'] && ENV['REDIS_URL'] != ''
         @redis ||= Redis.new(url: ENV['REDIS_URL'])
       else
@@ -8,23 +8,26 @@ module Trophonius
       end
     end
 
-    def key_exists?(key:)
+    def self.key_exists?(key:)
+      connect unless connectted?
       !(@redis.get(key).nil? || @redis.get(key).empty?)
     end
 
-    def get_key(key:)
+    def self.get_key(key:)
+      connect unless connectted?
       @redis.get(key)
     end
 
-    def set_key(key:, value:)
+    def self.set_key(key:, value:)
+      connect unless connectted?
       @redis.set(key, value)
     end
 
-    def connected?
+    def self.connected?
       @redis.connected?
     end
 
-    def disconnect
+    def self.disconnect
       @redis.disconnect!
     end
   end
