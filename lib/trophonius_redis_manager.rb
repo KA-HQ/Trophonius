@@ -20,8 +20,12 @@ module Trophonius
       @redis.set(key, value)
     end
 
+    def connected?
+      @redis.connected?
+    end
+
     def disconnect
-      @redis.quit
+      @redis.disconnect!
     end
   end
 end
