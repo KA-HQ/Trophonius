@@ -1,6 +1,7 @@
+require 'time'
 require 'base64'
 require 'typhoeus'
-
+require 'trophonius_redis_manager'
 module Trophonius
   module Trophonius::Connection
     ##
@@ -9,9 +10,16 @@ module Trophonius
     # @return [String] the *token* used to connect with the FileMaker data api
 
     def self.connect
-      @token = setup_connection
-      @last_connection = Time.now
-      @token
+      if Trophonius.config.redis_connection
+        redis_manager = Trophonius::RedisManager.new
+        redis_manager.set_key(key: 'token', value: setup_connection)
+        redis_manager.set_key(key: 'last_connection', value: Time.now)
+        redis_manager.get_key(key: 'token')
+      else
+        @token = setup_connection
+        @last_connection = Time.now
+        @token
+      end
     end
 
     ##
@@ -20,28 +28,52 @@ module Trophonius
     # @return [String] the *token* used to connect with the FileMaker data api if successful
 
     def self.setup_connection
-      @token = ''
+      if Trophonius.config.redis_connection
+        redis_manager = Trophonius::RedisManager.new
+        redis_manager.set_key(key: 'token', value: '')
+        redis_manager.set_key(key: 'last_connection', value: nil)
+      else
+        @token = ''
+      end
       ssl_verifyhost = Trophonius.config.local_network ? 0 : 2
       ssl_verifypeer = !Trophonius.config.local_network
-      url = URI("http#{Trophonius.config.ssl == true ? 's' : ''}://#{Trophonius.config.host}/fmi/data/v1/databases/#{Trophonius.config.database}/sessions")
-      request = Typhoeus::Request.new(
-        url,
-        method: :post,
-        body: Trophonius.config.external_name.empty? ? {} : { fmDataSource: [{ database: Trophonius.config.external_name, username: Trophonius.config.external_username, password: Trophonius.config.external_password }] }.to_json,
-        params: {},
-        ssl_verifyhost: ssl_verifyhost,
-        ssl_verifypeer: ssl_verifypeer,
-        headers: { 'Content-Type' => 'application/json', Authorization: "Basic #{Base64.strict_encode64("#{Trophonius.config.username}:#{Trophonius.config.password}")}" }
-      )
+      url =
+        URI(
+          "http#{Trophonius.config.ssl == true ? 's' : ''}://#{Trophonius.config.host}/fmi/data/v1/databases/#{Trophonius.config.database}/sessions"
+        )
+      request =
+        Typhoeus::Request.new(
+          url,
+          method: :post,
+          body:
+            if Trophonius.config.external_name.empty?
+              {}
+            else
+              {
+                fmDataSource: [
+                  {
+                    database: Trophonius.config.external_name,
+                    username: Trophonius.config.external_username,
+                    password: Trophonius.config.external_password
+                  }
+                ]
+              }.to_json
+            end,
+          params: {},
+          ssl_verifyhost: ssl_verifyhost,
+          ssl_verifypeer: ssl_verifypeer,
+          headers: {
+            'Content-Type' => 'application/json',
+            Authorization: "Basic #{Base64.strict_encode64("#{Trophonius.config.username}:#{Trophonius.config.password}")}"
+          }
+        )
       temp = request.run
 
       begin
         parsed = JSON.parse(temp.response_body)
-        if parsed['messages'][0]['code'] != '0'
-          Error.throw_error(response['messages'][0]['code'])
-        end
+        Error.throw_error(response['messages'][0]['code']) if parsed['messages'][0]['code'] != '0'
         return parsed['response']['token']
-      rescue Exception
+      rescue Exception => e
         Error.throw_error('1631')
       end
     end
@@ -50,29 +82,36 @@ module Trophonius
     # Returns the last received token
     # @return [String] the last valid *token* used to connect with the FileMaker data api
     def self.token
-      @token
+      redis_manager = Trophonius::RedisManager.new
+      Trophonius.config.redis_connection ? redis_manager.get_key(key: 'token') : @token
     end
 
     ##
     # Returns the receive time of the last received token
     # @return [Time] Returns the receive time of the last received token
     def self.last_connection
-      @last_connection
+      redis_manager = Trophonius::RedisManager.new
+      last = redis_manager.get_key(key: 'last_connection')
+      last = last.nil? ? nil : Time.parse(last)
+      Trophonius.config.redis_connection ? last : @last_connection
     end
 
     ##
     # Tests whether the FileMaker token is still valid
     # @return [Boolean] True if the token is valid False if invalid
     def self.test_connection
-      url = URI("http#{Trophonius.config.ssl == true ? 's' : ''}://#{Trophonius.config.host}/fmi/data/v1/databases/#{Trophonius.config.database}/layouts/#{Trophonius.config.layout_name}/records?_limit=1")
-      begin
-        request = Typhoeus::Request.new(
-          url,
-          method: :get,
-          body: {},
-          params: {},
-          headers: { 'Content-Type' => 'application/json', Authorization: "Bearer #{@token}" }
+      url =
+        URI(
+          "http#{Trophonius.config.ssl == true ? 's' : ''}://#{Trophonius.config.host}/fmi/data/v1/databases/#{Trophonius.config.database}/layouts/#{
+            Trophonius.config.layout_name
+          }/records?_limit=1"
         )
+      begin
+        request =
+          Typhoeus::Request.new(
+            url,
+            method: :get, body: {}, params: {}, headers: { 'Content-Type' => 'application/json', Authorization: "Bearer #{@token}" }
+          )
         temp = request.run
         JSON.parse(temp.response_body)['messages'][0]['code'] == '0'
       rescue StandardError
@@ -84,10 +123,10 @@ module Trophonius
     # Returns whether the current connection is still valid
     # @return [Boolean] True if the connection is valid False if invalid
     def self.valid_connection?
-      if test_connection == false
+      if Trophonius.config.layout_name != '' && test_connection == false
         false
       else
-        @last_connection.nil? ? false : (((Time.now - last_connection) / 60).round <= 15 || test_connection)
+        last_connection.nil? ? false : (((Time.now - last_connection) / 60).round <= 15 || test_connection)
       end
     end
   end
