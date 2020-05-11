@@ -9,17 +9,17 @@ module Trophonius
     end
 
     def self.key_exists?(key:)
-      connect unless connectted?
+      connect unless connected?
       !(@redis.get(key).nil? || @redis.get(key).empty?)
     end
 
     def self.get_key(key:)
-      connect unless connectted?
+      connect unless connected?
       @redis.get(key)
     end
 
     def self.set_key(key:, value:)
-      connect unless connectted?
+      connect unless connected?
       @redis.set(key, value)
     end
 
