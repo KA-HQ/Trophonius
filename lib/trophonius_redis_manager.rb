@@ -21,7 +21,7 @@ module Trophonius
     end
 
     def disconnect
-      @redis.disconnect!
+      @redis.quit
     end
   end
 end
