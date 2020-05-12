@@ -30,6 +30,14 @@ module Trophonius
       @current_query ||= [{}]
     end
 
+    ##
+    # Returns the current sort order, creates an empty sort order if no current sort order exists
+    #
+    # @return [Array[Hash]] array representing the FileMaker sort request
+    def build_sort
+      @current_sort ||= [{}]
+    end
+
     def inspect
       @current_query
     end
@@ -55,6 +63,17 @@ module Trophonius
     end
 
     ##
+    # Adds an sort request to the original query, resulting in an "sorted" query
+    #
+    # @param [args] arguments containing a Hash containing the FileMaker sort request, and the base model object for the query
+    # @return [Trophonius::Model] updated base model
+    def sort(args)
+      puts args
+      # args[1].current_query.build_query << args[0].merge!(omit: true)
+      args[1]
+    end
+
+    ##
     # Performs the query in FileMaker
     #
     # @param [method] original called method, will be called on the response
@@ -63,11 +82,14 @@ module Trophonius
     #
     # @return Response of the called method
     def run_query(method, *args, &block)
-      url = URI("http#{Trophonius.config.ssl == true ? 's' : ''}://#{Trophonius.config.host}/fmi/data/v1/databases/#{Trophonius.config.database}/layouts/#{@trophonius_model.layout_name}/_find")
+      url =
+        URI(
+          "http#{Trophonius.config.ssl == true ? 's' : ''}://#{Trophonius.config.host}/fmi/data/v1/databases/#{Trophonius.config.database}/layouts/#{
+            @trophonius_model.layout_name
+          }/_find"
+        )
       new_field_data = @current_query.map { |_q| {} }
-      if @trophonius_model.translations.keys.empty?
-        @trophonius_model.create_translations
-      end
+      @trophonius_model.create_translations if @trophonius_model.translations.keys.empty?
       @current_query.each_with_index do |query, index|
         query.keys.each do |k|
           if @trophonius_model.translations.key?(k.to_s)
@@ -88,15 +110,15 @@ module Trophonius
           RecordSet.new(@trophonius_model.layout_name, @trophonius_model.non_modifiable_fields).send(method, *args, &block)
           return
         else
-          if response["messages"][0]["code"] == "102"
+          if response['messages'][0]['code'] == '102'
             results = Request.retrieve_first(@trophonius_model.layout_name)
-            if results["messages"][0]["code"] != "0"
-              Error.throw_error("102")
+            if results['messages'][0]['code'] != '0'
+              Error.throw_error('102')
             else
-              r_results = results["response"]["data"]
-              ret_val = r_results.empty? ? Error.throw_error("102") : r_results[0]['fieldData']
+              r_results = results['response']['data']
+              ret_val = r_results.empty? ? Error.throw_error('102') : r_results[0]['fieldData']
               query_keys = new_field_data.map { |q| q.keys.map(&:downcase) }.uniq
-              Error.throw_error("102", (query_keys - ret_val.keys.map(&:downcase)).flatten.join(', '), @trophonius_model.layout_name) 
+              Error.throw_error('102', (query_keys - ret_val.keys.map(&:downcase)).flatten.join(', '), @trophonius_model.layout_name)
             end
           end
           Error.throw_error(response['messages'][0]['code'])
