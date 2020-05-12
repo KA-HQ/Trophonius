@@ -40,7 +40,6 @@ module Trophonius
     #
     # @return [Trophonius::Model] Self
     def self.paginate(page, limit)
-      puts "USING PAGE AND LIMIT: (#{page}, #{limit})"
       @offset = ((page * limit - limit) + 1).to_s
       @limit = limit.to_s
       self

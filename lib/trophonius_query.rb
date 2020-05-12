@@ -63,6 +63,17 @@ module Trophonius
     end
 
     ##
+    # Sets or updates the limit and offset for a query
+    #
+    # @param [args] arguments containing the limit and offset
+    # @return [Trophonius::Model] updated base model
+    def paginate(args)
+      puts args
+      # args[1].current_query.build_query << args[0].merge!(omit: true)
+      args[1]
+    end
+
+    ##
     # Adds an sort request to the original query, resulting in an "sorted" query
     #
     # @param [args] arguments containing a Hash containing the FileMaker sort request, and the base model object for the query
