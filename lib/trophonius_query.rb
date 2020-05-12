@@ -109,7 +109,7 @@ module Trophonius
           end
         end
       end
-      if @offset.empty? || @limit.empty?
+      if @offset.nil? || @limit.nil? || @offset == 0 || @limit == 0
         body = { query: new_field_data, limit: '100000' }.to_json
       else
         body = { query: new_field_data, limit: @limit.to_s, offset: @offset.to_s }.to_json
