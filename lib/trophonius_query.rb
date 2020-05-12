@@ -68,7 +68,7 @@ module Trophonius
     # @param [args] arguments containing the limit and offset
     # @return [Trophonius::Model] updated base model
     def paginate(args)
-      @offset = args[0]
+      @offset = ((args[0] * args[1] - args[1]) + 1)
       @limit = args[1]
       args[2]
     end
