@@ -162,6 +162,7 @@ To run a FileMaker script from the context of a model you can call the run_scrip
 - [x] Store token in Redis
 - [x] More container support
 - [x] Remove non_modifiable_fields requirement from Model
+- [ ] FileMaker sorting
 
 # Contributing
 
