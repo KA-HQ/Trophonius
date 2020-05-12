@@ -68,9 +68,9 @@ module Trophonius
     # @param [args] arguments containing the limit and offset
     # @return [Trophonius::Model] updated base model
     def paginate(args)
-      puts "#{args[0]} #{args[1]} #{args[2..-1]}"
-      # args[1].current_query.build_query << args[0].merge!(omit: true)
-      args[1]
+      @offset = args[0]
+      @limit = args[1]
+      args[2]
     end
 
     ##
