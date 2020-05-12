@@ -35,7 +35,7 @@ module Trophonius
     #
     # @return [Array[Hash]] array representing the FileMaker sort request
     def build_sort
-      @current_sort ||= [{}]
+      @current_sort ||= []
     end
 
     def inspect
@@ -79,7 +79,14 @@ module Trophonius
     # @param [args] arguments containing a Hash containing the FileMaker sort request, and the base model object for the query
     # @return [Trophonius::Model] updated base model
     def sort(args)
-      args[1].current_query.build_sort << args[0]
+      @trophonius_model.create_translations if @trophonius_model.translations.keys.empty?
+      args[0].each do |key, value|
+        if @trophonius_model.translations.key?(key.to_s)
+          args[1].current_query.build_sort << { fieldName: "#{@trophonius_model.translations[key.to_s]}", sortOrder: "#{value}" }
+        else
+          args[1].current_query.build_sort << { fieldName: "#{key}", sortOrder: "#{value}" }
+        end
+      end
       args[1]
     end
 
@@ -99,7 +106,7 @@ module Trophonius
           }/_find"
         )
       new_field_data = @current_query.map { |_q| {} }
-      new_field_sort = @current_sort ? nil : @current_sort.map { |_s| {} }
+
       @trophonius_model.create_translations if @trophonius_model.translations.keys.empty?
       @current_query.each_with_index do |query, index|
         query.keys.each do |k|
@@ -110,30 +117,22 @@ module Trophonius
           end
         end
       end
-      @current_sort.each_with_index do |sort, index|
-        sort.keys.each do |k|
-          if @trophonius_model.translations.key?(k.to_s)
-            new_field_sort[index].merge!(@trophonius_model.translations[k.to_s].to_s => sort[k].to_s)
-          else
-            new_field_sort[index].merge!(k.to_s => sort[k].to_s)
-          end
-        end
-      end
-      if @offset.nil? || @limit.nil? || @offset == 0 || @limit == 0
+      if @offset.nil? || @limit.nil? || @offset == '' || @limit == '' || @offset == 0 || @limit == 0
         body =
-          if new_field_sort.nil?
+          if @current_sort.nil?
             { query: new_field_data, limit: '100000' }.to_json
           else
-            { query: new_field_data, sort: new_field_sort, limit: '100000' }.to_json
+            { query: new_field_data, sort: @current_sort, limit: '100000' }.to_json
           end
       else
         body =
-          if new_field_sort.nil?
+          if @current_sort.nil?
             { query: new_field_data, limit: @limit.to_s, offset: @offset.to_s }.to_json
           else
-            { query: new_field_data, sort: new_field_sort, limit: @limit.to_s, offset: @offset.to_s }.to_json
+            { query: new_field_data, sort: @current_sort, limit: @limit.to_s, offset: @offset.to_s }.to_json
           end
       end
+
       response = Request.make_request(url, "Bearer #{Request.get_token}", 'post', body)
       if response['messages'][0]['code'] != '0'
         if response['messages'][0]['code'] == '101' || response['messages'][0]['code'] == '401'
