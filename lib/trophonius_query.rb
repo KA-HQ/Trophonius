@@ -74,7 +74,7 @@ module Trophonius
     end
 
     ##
-    # Adds an sort request to the original query, resulting in an "sorted" query
+    # Adds a sort request to the original query, resulting in an "sorted" query
     #
     # @param [args] arguments containing a Hash containing the FileMaker sort request, and the base model object for the query
     # @return [Trophonius::Model] updated base model

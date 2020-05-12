@@ -113,6 +113,12 @@ If you want to find records without the specified query you can use the "not" me
   MyModel.where(number_field: 100).or(number_field: 101).to_a # Records where NumberField is 100 or 101 (if any)
 ```
 
+### Sorted find request
+
+```ruby
+  MyModel.where(number_field: 100).sort(number_field: 'ascending').to_a # Records where NumberField is 100 sorted by number_field ascending (if any)
+```
+
 ## Update records
 
 To update the data of a record you can find a record in the FileMaker database and use the assignment operator on it's fields. A field can be accessed in two ways: if the field does not contain any non-word characters it is available as method for the record. Otherwise it is available as a key using the [] operator.
@@ -162,7 +168,7 @@ To run a FileMaker script from the context of a model you can call the run_scrip
 - [x] Store token in Redis
 - [x] More container support
 - [x] Remove non_modifiable_fields requirement from Model
-- [ ] FileMaker sorting
+- [x] FileMaker sorting
 
 # Contributing
 
