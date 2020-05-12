@@ -113,9 +113,9 @@ module Trophonius
       @current_sort.each_with_index do |sort, index|
         sort.keys.each do |k|
           if @trophonius_model.translations.key?(k.to_s)
-            new_field_data[index].merge!(@trophonius_model.translations[k.to_s].to_s => sort[k].to_s)
+            new_field_sort[index].merge!(@trophonius_model.translations[k.to_s].to_s => sort[k].to_s)
           else
-            new_field_data[index].merge!(k.to_s => sort[k].to_s)
+            new_field_sort[index].merge!(k.to_s => sort[k].to_s)
           end
         end
       end
