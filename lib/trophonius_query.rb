@@ -68,8 +68,7 @@ module Trophonius
     # @param [args] arguments containing a Hash containing the FileMaker sort request, and the base model object for the query
     # @return [Trophonius::Model] updated base model
     def sort(args)
-      puts args[1]
-      # args[1].current_query.build_query << args[0].merge!(omit: true)
+      args[1].current_query.build_sort << args[0]
       args[1]
     end
 
