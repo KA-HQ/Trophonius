@@ -136,8 +136,8 @@ module Trophonius
       response = Request.make_request(url, "Bearer #{Request.get_token}", 'post', body)
       if response['messages'][0]['code'] != '0'
         if response['messages'][0]['code'] == '101' || response['messages'][0]['code'] == '401'
-          RecordSet.new(@trophonius_model.layout_name, @trophonius_model.non_modifiable_fields).send(method, *args, &block)
-          return
+          resp = RecordSet.new(@trophonius_model.layout_name, @trophonius_model.non_modifiable_fields).send(method, *args, &block)
+          return resp
         else
           if response['messages'][0]['code'] == '102'
             results = Request.retrieve_first(@trophonius_model.layout_name)
