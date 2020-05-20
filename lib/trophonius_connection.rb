@@ -81,7 +81,6 @@ module Trophonius
     # Returns the last received token
     # @return [String] the last valid *token* used to connect with the FileMaker data api
     def self.token
-      token = Trophonius::RedisManager.get_key(key: 'token')
       return Trophonius.config.redis_connection ? Trophonius::RedisManager.get_key(key: 'token') : @token
     end
 
@@ -89,7 +88,7 @@ module Trophonius
     # Returns the receive time of the last received token
     # @return [Time] Returns the receive time of the last received token
     def self.last_connection
-      last = Trophonius::RedisManager.get_key(key: 'last_connection')
+      last = Trophonius.config.redis_connection ? Trophonius::RedisManager.get_key(key: 'last_connection') : nil
       last = last.nil? ? nil : Time.parse(last)
       Trophonius.config.redis_connection ? last : @last_connection
     end
