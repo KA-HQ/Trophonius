@@ -2,10 +2,12 @@ module Trophonius
   # the RedisManager module is used to create a (single) connection to a redis store.
   module Trophonius::RedisManager
     def self.connect
-      if ENV['REDIS_URL'] && ENV['REDIS_URL'] != ''
-        @redis ||= Redis.new(url: ENV['REDIS_URL'])
-      else
-        @redis ||= Redis.new
+      if Trophonius.config.redis_connection
+        if ENV['REDIS_URL'] && ENV['REDIS_URL'] != ''
+          @redis ||= Redis.new(url: ENV['REDIS_URL'])
+        else
+          @redis ||= Redis.new
+        end
       end
       return nil
     end
