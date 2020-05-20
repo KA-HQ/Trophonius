@@ -70,11 +70,11 @@ module Trophonius
 
       begin
         parsed = JSON.parse(temp.response_body)
-        Error.throw_error(response['messages'][0]['code']) if parsed['messages'][0]['code'] != '0'
-        return parsed['response']['token']
       rescue Exception => e
         Error.throw_error('1631')
       end
+      Error.throw_error(response['messages'][0]['code']) if parsed['messages'][0]['code'] != '0'
+      return parsed['response']['token']
     end
 
     ##
