@@ -73,7 +73,7 @@ module Trophonius
       rescue Exception => e
         Error.throw_error('1631')
       end
-      Error.throw_error(response['messages'][0]['code']) if parsed['messages'][0]['code'] != '0'
+      Error.throw_error(parsed['messages'][0]['code']) if parsed['messages'][0]['code'] != '0'
       return parsed['response']['token']
     end
 
