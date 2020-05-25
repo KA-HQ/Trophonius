@@ -1,6 +1,6 @@
 # Trophonius
 
-A link between Ruby (on Rails) and FileMaker using the FileMaker Data-API.
+A lightweight pure ruby link between Ruby (on Rails) and FileMaker using the FileMaker Data-API.
 
 Do you need support connecting your FileMaker database?
 Or do you have an awesome ruby project in mind?
