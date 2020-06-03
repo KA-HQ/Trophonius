@@ -169,6 +169,7 @@ To run a FileMaker script from the context of a model you can call the run_scrip
 - [x] More container support
 - [x] Remove non_modifiable_fields requirement from Model
 - [x] FileMaker sorting
+- [ ] has_many/belongs_to relationships between models
 
 # Contributing
 
