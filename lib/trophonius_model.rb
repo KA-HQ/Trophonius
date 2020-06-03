@@ -334,6 +334,8 @@ module Trophonius
       hash = Trophonius::Record.new
       hash.record_id = result['recordId']
       hash.layout_name = layout_name
+      hash.model_name = name
+
       result['fieldData'].keys.each do |key|
         # unless key[/\s/] || key[/\W/]
         @configuration.translations.merge!(
