@@ -18,6 +18,8 @@ module Trophonius
     config_accessor(:non_modifiable_fields) { [] }
     config_accessor(:all_fields) { {} }
     config_accessor(:translations) { {} }
+    config_accessor(:has_many_relations) { {} }
+    config_accessor(:belongs_to_relations) { {} }
     config_accessor(:local_network) { false }
     config_accessor(:redis_connection) { false }
   end

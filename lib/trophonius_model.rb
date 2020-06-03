@@ -8,7 +8,7 @@ require 'trophonius_error'
 module Trophonius
   # This class will retrieve the records from the FileMaker database and build a RecordSet filled with Record objects. One Record object represents a record in FileMaker.
   class Trophonius::Model
-    attr_reader :configuration, :has_many_relations, :belongs_to_relations
+    attr_reader :configuration
     attr_accessor :current_query
 
     def initialize(config:)
@@ -28,8 +28,8 @@ module Trophonius
       @configuration.non_modifiable_fields = configuration[:non_modifiable_fields]
       @configuration.all_fields = {}
       @configuration.translations = {}
-      @has_many_relations = {}
-      @belongs_to_relations = {}
+      @configuration.has_many_relations = {}
+      @configuration.belongs_to_relations = {}
       @offset = ''
       @limit = ''
     end
@@ -40,11 +40,8 @@ module Trophonius
     # @param [Symbol] model_name: the name of the model to build a relation with
     # @param [String] primary_key: the name of the field containing the primary to build the relation over
     # @param [String] foreign_key: the name of the field containing the primary to build the relation over
-    #
-    # @return [Trophonius::Model] Self
     def self.belongs_to(model_name, primary_key:, foreign_key:)
-      @belongs_to_relations.merge!(model_name => { primary_key: primary_key, foreign_key: foreign_key })
-      self
+      @configuration.belongs_to_relations.merge!({ model_name => { primary_key: primary_key, foreign_key: foreign_key } })
     end
 
     ##
@@ -53,11 +50,8 @@ module Trophonius
     # @param [Symbol] model_name: the name of the model to build a relation with
     # @param [String] primary_key: the name of the field containing the primary to build the relation over
     # @param [String] foreign_key: the name of the field containing the primary to build the relation over
-    #
-    # @return [Trophonius::Model] Self
     def self.has_many(model_name, primary_key:, foreign_key:)
-      @has_many_relations.merge!(model_name => { primary_key: primary_key, foreign_key: foreign_key })
-      self
+      @configuration.has_many_relations.merge!({ model_name => { primary_key: primary_key, foreign_key: foreign_key } })
     end
 
     ##
@@ -79,6 +73,22 @@ module Trophonius
     # @return [String] layout name of the model
     def self.layout_name
       @configuration.layout_name
+    end
+
+    ##
+    # Returns the Hash containing the related parent models
+    #
+    # @return [Hash] child models
+    def self.has_many_relations
+      @configuration.has_many_relations
+    end
+
+    ##
+    # Returns the Hash containing the related parent models
+    #
+    # @return [Hash] parent models
+    def self.belongs_to_relations
+      @configuration.belongs_to_relations
     end
 
     ##
