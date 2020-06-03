@@ -66,7 +66,7 @@ module Trophonius
                 else
                   r_results = results['response']['data']
                   ret_val = r_results.empty? ? Error.throw_error('102') : r_results[0]['fieldData']
-                  query_keys = new_field_data.map { |q| q.keys.map(&:downcase) }.uniq
+                  query_keys = [foreign_key_field]
                   Error.throw_error('102', (query_keys - ret_val.keys.map(&:downcase)).flatten.join(', '), layout)
                 end
               end
@@ -126,7 +126,7 @@ module Trophonius
                 else
                   r_results = results['response']['data']
                   ret_val = r_results.empty? ? Error.throw_error('102') : r_results[0]['fieldData']
-                  query_keys = new_field_data.map { |q| q.keys.map(&:downcase) }.uniq
+                  query_keys = [primary_key_field]
                   Error.throw_error('102', (query_keys - ret_val.keys.map(&:downcase)).flatten.join(', '), layout)
                 end
               end
