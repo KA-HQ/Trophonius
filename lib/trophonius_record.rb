@@ -90,6 +90,7 @@ module Trophonius
         if pk_model.has_many_relations[ActiveSupport::Inflector.parameterize(ActiveSupport::Inflector.pluralize(model_name)).to_sym]
           relation = pk_model.has_many_relations[ActiveSupport::Inflector.parameterize(ActiveSupport::Inflector.pluralize(model_name)).to_sym]
           layout = pk_model.layout_name
+          puts pk_model
           pk_model.create_translations if pk_model.translations.keys.empty?
 
           url =
