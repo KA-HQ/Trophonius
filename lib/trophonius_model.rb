@@ -28,8 +28,36 @@ module Trophonius
       @configuration.non_modifiable_fields = configuration[:non_modifiable_fields]
       @configuration.all_fields = {}
       @configuration.translations = {}
+      @has_many = {}
+      @belongs_to = {}
       @offset = ''
       @limit = ''
+    end
+
+    ##
+    # Add a belongs to relationship.
+    #
+    # @param [Symbol] model_name: the name of the model to build a relation with
+    # @param [String] primary_key: the name of the field containing the primary to build the relation over
+    # @param [String] foreign_key: the name of the field containing the primary to build the relation over
+    #
+    # @return [Trophonius::Model] Self
+    def self.belongs_to(configuration)
+      @belongs_to.merge!(model_name => { primary_key: primary_key, foreign_key: foreign_key })
+      self
+    end
+
+    ##
+    # Add a has many relationship.
+    #
+    # @param [Symbol] model_name: the name of the model to build a relation with
+    # @param [String] primary_key: the name of the field containing the primary to build the relation over
+    # @param [String] foreign_key: the name of the field containing the primary to build the relation over
+    #
+    # @return [Trophonius::Model] Self
+    def self.has_many(model_name, primary_key:, foreign_key:)
+      @has_many.merge!(model_name => { primary_key: primary_key, foreign_key: foreign_key })
+      self
     end
 
     ##
