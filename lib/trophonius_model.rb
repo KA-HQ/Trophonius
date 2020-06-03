@@ -8,7 +8,7 @@ require 'trophonius_error'
 module Trophonius
   # This class will retrieve the records from the FileMaker database and build a RecordSet filled with Record objects. One Record object represents a record in FileMaker.
   class Trophonius::Model
-    attr_reader :configuration, :has_many, :belongs_to
+    attr_reader :configuration, :has_many_relations, :belongs_to_relations
     attr_accessor :current_query
 
     def initialize(config:)
@@ -28,8 +28,8 @@ module Trophonius
       @configuration.non_modifiable_fields = configuration[:non_modifiable_fields]
       @configuration.all_fields = {}
       @configuration.translations = {}
-      @has_many = {}
-      @belongs_to = {}
+      @has_many_relations = {}
+      @belongs_to_relations = {}
       @offset = ''
       @limit = ''
     end
@@ -43,7 +43,7 @@ module Trophonius
     #
     # @return [Trophonius::Model] Self
     def self.belongs_to(model_name, primary_key:, foreign_key:)
-      @belongs_to.merge!(model_name => { primary_key: primary_key, foreign_key: foreign_key })
+      @belongs_to_relations.merge!(model_name => { primary_key: primary_key, foreign_key: foreign_key })
       self
     end
 
@@ -56,7 +56,7 @@ module Trophonius
     #
     # @return [Trophonius::Model] Self
     def self.has_many(model_name, primary_key:, foreign_key:)
-      @has_many.merge!(model_name => { primary_key: primary_key, foreign_key: foreign_key })
+      @has_many_relations.merge!(model_name => { primary_key: primary_key, foreign_key: foreign_key })
       self
     end
 
