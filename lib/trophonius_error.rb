@@ -19,6 +19,14 @@ module Trophonius
     class ConnectionError < StandardError; end # :nodoc:
     class EmptyFindError < StandardError; end # :nodoc:
     class ValidationError < StandardError; end # :nodoc:
+    class DateValueError < ValidationError; end # :nodoc:
+    class TimeValueError < ValidationError; end # :nodoc:
+    class NumberValueError < ValidationError; end # :nodoc:
+    class ValueOutOfRangeError < ValidationError; end # :nodoc:
+    class ValueNotUniqueError < ValidationError; end # :nodoc:
+    class ValueNotExistingError < ValidationError; end # :nodoc:
+    class ValueNotInValuelistError < ValidationError; end # :nodoc:
+    class ValueFailedCalculationError < ValidationError; end # :nodoc:
 
     ##
     # Throws an error corresponding to the error number
@@ -140,14 +148,21 @@ module Trophonius
         # when "417"
         # when "418"
       when '500'
-        raise ValidationError.new, 'Data value does not meet validation entry options (hint make sure your date values are formatted as MM/DD/YYYY)'
-        # when "501"
-        # when "502"
-        # when "503"
-        # when "504"
-        # when "505"
-        # when "506"
-        # when "507"
+        raise DateValueError.new, 'Date value does not meet validation entry options (hint make sure your date values are formatted as MM/DD/YYYY)'
+      when '501'
+        raise TimeValueError.new, 'Time value does not meet validation entry options'
+      when '502'
+        raise NumberValueError.new, 'Number value does not meet validation entry options'
+      when '503'
+        raise ValueOutOfRangeError.new, 'Value in field is not within the range specified in validation entry options'
+      when '504'
+        raise ValueNotUniqueError.new, 'Value in field is not unique, as required in validation entry options'
+      when '505'
+        raise ValueNotExistingError.new, 'Value in field is not an existing value in the file, as required in validation entry options'
+      when '506'
+        raise ValueNotInValuelistError.new, 'Value in field is not listed in the value list specified in validation entry options'
+      when '507'
+        raise ValueFailedCalculationError.new, 'Value in field failed calculation test of validation entry options'
         # when "508"
         # when "509"
         # when "510"
