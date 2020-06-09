@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    trophonius (1.2.4.9)
+    trophonius (1.2.5.3)
       activesupport (~> 6.x)
       redis (~> 4.0)
       typhoeus (~> 1.3)

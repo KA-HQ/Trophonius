@@ -78,6 +78,42 @@ module Trophonius
     end
 
     ##
+    # Disconnects from the FileMaker server
+    #
+    def self.disconnect
+      url =
+        URI(
+          "http#{Trophonius.config.ssl == true ? 's' : ''}://#{Trophonius.config.host}/fmi/data/v1/databases/#{Trophonius.config.database}/sessions/#{
+            token
+          }"
+        )
+      puts url
+      ssl_verifyhost = Trophonius.config.local_network ? 0 : 2
+      ssl_verifypeer = !Trophonius.config.local_network
+
+      request =
+        Typhoeus::Request.new(
+          url,
+          method: :delete,
+          params: {},
+          ssl_verifyhost: ssl_verifyhost,
+          ssl_verifypeer: ssl_verifypeer,
+          headers: { 'Content-Type' => 'application/json' }
+        )
+      temp = request.run
+
+      begin
+        parsed = JSON.parse(temp.response_body)
+      rescue Exception => e
+        Error.throw_error('1631')
+      end
+      Error.throw_error(parsed['messages'][0]['code']) if parsed['messages'][0]['code'] != '0'
+      Trophonius::RedisManager.disconnect! if Trophonius.config.redis_connection
+      @token = ''
+      return true
+    end
+
+    ##
     # Returns the last received token
     # @return [String] the last valid *token* used to connect with the FileMaker data api
     def self.token
