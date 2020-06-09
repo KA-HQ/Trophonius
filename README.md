@@ -158,6 +158,12 @@ To run a FileMaker script from the context of a model you can call the run_scrip
   MyModel.run_script(script: "My Awesome Script", scriptparameter: "ScriptParameter") #the script parameter is optional
 ```
 
+## Disconnecting from the Data API
+
+To close the connection to the FileMaker server simply call:
+```ruby
+  Trophonius::Connection.disconnect
+```
 # To do
 
 - [x] Better portal support (get supported)
