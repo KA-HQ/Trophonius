@@ -84,7 +84,7 @@ module Trophonius
       url =
         URI(
           "http#{Trophonius.config.ssl == true ? 's' : ''}://#{Trophonius.config.host}/fmi/data/v1/databases/#{Trophonius.config.database}/sessions/#{
-            token
+            Trophonius.config.redis_connection ? Trophonius::RedisManager.get_key(key: 'token') : @token
           }"
         )
       puts url
