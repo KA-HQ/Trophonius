@@ -109,7 +109,8 @@ module Trophonius
       end
       Error.throw_error(parsed['messages'][0]['code']) if parsed['messages'][0]['code'] != '0'
       Trophonius::RedisManager.disconnect! if Trophonius.config.redis_connection
-      @token = ''
+      @token = nil
+      @last_connection = nil
       return true
     end
 
