@@ -102,7 +102,7 @@ If you want a more restricted set of records or a specific record you might want
  If a condition requires multiple statements to be true, you can simply add multiple fields in the same where:
  ```ruby
   record = MyModel.find(100) # Record with recordID 100 (if available)
-  MyModel.where(number_field: 100, date_field: Date.today.strftime('%m/%d/%Y')).to_a # Records where NumberField is 100 (if any)
+  MyModel.where(number_field: 100, date_field: Date.today.strftime('%m/%d/%Y')).to_a # Records where NumberField is 100 and date_field contains the date of today(if any)
   record.portal.each do |portal_record|
     portal_record.child_field
   end
