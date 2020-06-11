@@ -168,6 +168,15 @@ To run a FileMaker script from the context of a model you can call the run_scrip
   MyModel.run_script(script: "My Awesome Script", scriptparameter: "ScriptParameter") #the script parameter is optional
 ```
 
+## Date and Time
+
+The FileMaker Data API requires dates to be formatted as MM/DD/YYYY. To make this easier Trophonius adds "to_fm" methods to the Date and Time classes to format these types more easily.
+
+```ruby
+ Date.today.to_fm
+ Time.now.to_fm
+```
+
 ## Disconnecting from the Data API
 
 To close the connection to the FileMaker server simply call:
