@@ -99,6 +99,16 @@ If you want a more restricted set of records or a specific record you might want
   end
 ```
 
+ If a condition requires multiple statements to be true, you can simply add multiple fields in the same where:
+ ```ruby
+  record = MyModel.find(100) # Record with recordID 100 (if available)
+  MyModel.where(number_field: 100, date_field: Date.today.strftime('%m/%d/%Y')).to_a # Records where NumberField is 100 (if any)
+  record.portal.each do |portal_record|
+    portal_record.child_field
+  end
+```
+ 
+
 ### Omit records
 
 If you want to find records without the specified query you can use the "not" method. This method will add an omit find request to the query. If the query gets executed, FileMaker will return the records where the condition does not hold.
