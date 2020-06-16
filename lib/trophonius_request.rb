@@ -4,7 +4,6 @@ require 'base64'
 require 'trophonius_connection'
 require 'uri'
 require 'net/http'
-
 module Trophonius
   module Trophonius::Request
     ##
@@ -37,7 +36,8 @@ module Trophonius
       temp = request.run
       begin
         JSON.parse(temp.response_body)
-      rescue Exception
+      rescue Exception => e
+        puts "Error was #{e}"
         Error.throw_error('1631')
       end
     end
@@ -53,7 +53,7 @@ module Trophonius
     #
     # @return [JSON] parsed json of the response
     def self.upload_file_request(url_param, auth, file)
-      url = URI(url_param)
+      url = URI(URI.escape(url_param.to_s))
 
       https = Net::HTTP.new(url.host, url.port)
       https.use_ssl = true
