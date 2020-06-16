@@ -36,7 +36,6 @@ This file should contain all the information the Data-API needs to setup a conne
 Trophonius.configure do |config|
   config.host = "location_to.your_filemakerserver.com"
   config.database = "Name_of_your_database"
-  config.layout_name = "Name_of_the_general_Data_API_layout"
   config.username = "Username to Access the Database" # or Rails.application.credentials.dig(:username) (requires >= Rails 5.2)
   config.password = "Y0urAmaz1ngPa$$w0rd" # or Rails.application.credentials.dig(:password) (requires >= Rails 5.2)
   config.count_result_script = "script that can be used to count the results (optional)"
