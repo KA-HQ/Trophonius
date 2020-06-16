@@ -4,7 +4,6 @@ require 'base64'
 require 'trophonius_connection'
 require 'uri'
 require 'net/http'
-require 'cgi'
 module Trophonius
   module Trophonius::Request
     ##
@@ -26,7 +25,7 @@ module Trophonius
       ssl_verifypeer = !Trophonius.config.local_network
       request =
         Typhoeus::Request.new(
-          URI(CGI.escape(url_param.to_s)),
+          URI(URI.escape(url_param.to_s)),
           method: method.to_sym,
           body: body,
           params: params,
@@ -54,7 +53,7 @@ module Trophonius
     #
     # @return [JSON] parsed json of the response
     def self.upload_file_request(url_param, auth, file)
-      url = URI(CGI.escape(url_param.to_s))
+      url = URI(URI.escape(url_param.to_s))
 
       https = Net::HTTP.new(url.host, url.port)
       https.use_ssl = true
