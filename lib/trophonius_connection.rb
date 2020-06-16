@@ -42,6 +42,7 @@ module Trophonius
             "http#{Trophonius.config.ssl == true ? 's' : ''}://#{Trophonius.config.host}/fmi/data/v1/databases/#{Trophonius.config.database}/sessions"
           )
         )
+      puts url
       request =
         Typhoeus::Request.new(
           url,
