@@ -4,7 +4,7 @@ require 'base64'
 require 'trophonius_connection'
 require 'uri'
 require 'net/http'
-
+require 'cgi'
 module Trophonius
   module Trophonius::Request
     ##
@@ -24,15 +24,16 @@ module Trophonius
     def self.make_request(url_param, auth, method, body, params = '')
       ssl_verifyhost = Trophonius.config.local_network ? 0 : 2
       ssl_verifypeer = !Trophonius.config.local_network
-      request = Typhoeus::Request.new(
-        url_param,
-        method: method.to_sym,
-        body: body,
-        params: params,
-        ssl_verifyhost: ssl_verifyhost,
-        ssl_verifypeer: ssl_verifypeer,
-        headers: { 'Content-Type' => 'application/json', Authorization: auth.to_s }
-      )
+      request =
+        Typhoeus::Request.new(
+          CGI.escape(url_param),
+          method: method.to_sym,
+          body: body,
+          params: params,
+          ssl_verifyhost: ssl_verifyhost,
+          ssl_verifypeer: ssl_verifypeer,
+          headers: { 'Content-Type' => 'application/json', Authorization: auth.to_s }
+        )
       temp = request.run
       begin
         JSON.parse(temp.response_body)
@@ -52,7 +53,7 @@ module Trophonius
     #
     # @return [JSON] parsed json of the response
     def self.upload_file_request(url_param, auth, file)
-      url = URI(url_param)
+      url = URI(CGI.escape(url_param))
 
       https = Net::HTTP.new(url.host, url.port)
       https.use_ssl = true
@@ -75,11 +76,7 @@ module Trophonius
     #
     # @return [String] a valid FileMaker token
     def self.get_token
-      if Connection.valid_connection?
-        Connection.token
-      else
-        Connection.connect
-      end
+      Connection.valid_connection? ? Connection.token : Connection.connect
     end
 
     ##
@@ -87,7 +84,12 @@ module Trophonius
     #
     # @return [JSON] The first record from FileMaker
     def self.retrieve_first(layout_name)
-      url = URI("http#{Trophonius.config.ssl == true ? 's' : ''}://#{Trophonius.config.host}/fmi/data/v1/databases/#{Trophonius.config.database}/layouts/#{layout_name}/records?_limit=1")
+      url =
+        URI(
+          "http#{Trophonius.config.ssl == true ? 's' : ''}://#{Trophonius.config.host}/fmi/data/v1/databases/#{Trophonius.config.database}/layouts/#{
+            layout_name
+          }/records?_limit=1"
+        )
       make_request(url, "Bearer #{get_token}", 'get', '{}')
     end
 
@@ -96,7 +98,12 @@ module Trophonius
     #
     # @return [JSON] The script result from FileMaker
     def self.run_script(script, scriptparameter, layout_name)
-      url = URI("http#{Trophonius.config.ssl == true ? 's' : ''}://#{Trophonius.config.host}/fmi/data/v1/databases/#{Trophonius.config.database}/layouts/#{layout_name}/records?_limit=1&script=#{script}&script.param=#{scriptparameter}")
+      url =
+        URI(
+          "http#{Trophonius.config.ssl == true ? 's' : ''}://#{Trophonius.config.host}/fmi/data/v1/databases/#{Trophonius.config.database}/layouts/#{
+            layout_name
+          }/records?_limit=1&script=#{script}&script.param=#{scriptparameter}"
+        )
       make_request(url, "Bearer #{get_token}", 'get', '{}')
     end
 
@@ -107,9 +114,23 @@ module Trophonius
     def self.retrieve_all(layout_name, sort)
       if !sort.empty?
         sort_order = sort.to_json.to_s
-        url = URI("http#{Trophonius.config.ssl == true ? 's' : ''}://#{Trophonius.config.host}/fmi/data/v1/databases/#{Trophonius.config.database}/layouts/#{layout_name}/records?_limit=10000000_sort=#{sort_order}#{Trophonius.config.count_result_script == '' ? '' : "&script=#{Trophonius.config.count_result_script}"}")
+        url =
+          URI(
+            "http#{Trophonius.config.ssl == true ? 's' : ''}://#{Trophonius.config.host}/fmi/data/v1/databases/#{
+              Trophonius.config.database
+            }/layouts/#{layout_name}/records?_limit=10000000_sort=#{sort_order}#{
+              Trophonius.config.count_result_script == '' ? '' : "&script=#{Trophonius.config.count_result_script}"
+            }"
+          )
       else
-        url = URI("http#{Trophonius.config.ssl == true ? 's' : ''}://#{Trophonius.config.host}/fmi/data/v1/databases/#{Trophonius.config.database}/layouts/#{layout_name}/records?_limit=10000000#{Trophonius.config.count_result_script == '' ? '' : "&script=#{Trophonius.config.count_result_script}"}")
+        url =
+          URI(
+            "http#{Trophonius.config.ssl == true ? 's' : ''}://#{Trophonius.config.host}/fmi/data/v1/databases/#{
+              Trophonius.config.database
+            }/layouts/#{layout_name}/records?_limit=10000000#{
+              Trophonius.config.count_result_script == '' ? '' : "&script=#{Trophonius.config.count_result_script}"
+            }"
+          )
       end
       make_request(url, "Bearer #{get_token}", 'get', '{}')
     end
