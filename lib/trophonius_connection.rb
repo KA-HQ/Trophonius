@@ -94,6 +94,7 @@ module Trophonius
         )
       ssl_verifyhost = Trophonius.config.local_network ? 0 : 2
       ssl_verifypeer = !Trophonius.config.local_network
+      puts url
 
       request =
         Typhoeus::Request.new(
@@ -146,6 +147,7 @@ module Trophonius
             }/layouts/#{Trophonius.config.layout_name}/records?_limit=1"
           )
         )
+      puts url
       begin
         request =
           Typhoeus::Request.new(
