@@ -23,6 +23,7 @@ module Trophonius
     def self.make_request(url_param, auth, method, body, params = '')
       ssl_verifyhost = Trophonius.config.local_network ? 0 : 2
       ssl_verifypeer = !Trophonius.config.local_network
+      puts "#{URI(URI.escape(url_param.to_s))}"
       request =
         Typhoeus::Request.new(
           URI(URI.escape(url_param.to_s)),
