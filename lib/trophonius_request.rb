@@ -23,7 +23,6 @@ module Trophonius
     def self.make_request(url_param, auth, method, body, params = '')
       ssl_verifyhost = Trophonius.config.local_network ? 0 : 2
       ssl_verifypeer = !Trophonius.config.local_network
-      puts "#{URI(URI.escape(url_param.to_s))}"
       request =
         Typhoeus::Request.new(
           URI(URI.escape(url_param.to_s)),
@@ -87,9 +86,11 @@ module Trophonius
     def self.retrieve_first(layout_name)
       url =
         URI(
-          "http#{Trophonius.config.ssl == true ? 's' : ''}://#{Trophonius.config.host}/fmi/data/v1/databases/#{Trophonius.config.database}/layouts/#{
-            layout_name
-          }/records?_limit=1"
+          URI.escape(
+            "http#{Trophonius.config.ssl == true ? 's' : ''}://#{Trophonius.config.host}/fmi/data/v1/databases/#{
+              Trophonius.config.database
+            }/layouts/#{layout_name}/records?_limit=1"
+          )
         )
       make_request(url, "Bearer #{get_token}", 'get', '{}')
     end
@@ -101,9 +102,11 @@ module Trophonius
     def self.run_script(script, scriptparameter, layout_name)
       url =
         URI(
-          "http#{Trophonius.config.ssl == true ? 's' : ''}://#{Trophonius.config.host}/fmi/data/v1/databases/#{Trophonius.config.database}/layouts/#{
-            layout_name
-          }/records?_limit=1&script=#{script}&script.param=#{scriptparameter}"
+          URI.escape(
+            "http#{Trophonius.config.ssl == true ? 's' : ''}://#{Trophonius.config.host}/fmi/data/v1/databases/#{
+              Trophonius.config.database
+            }/layouts/#{layout_name}/records?_limit=1&script=#{script}&script.param=#{scriptparameter}"
+          )
         )
       make_request(url, "Bearer #{get_token}", 'get', '{}')
     end
@@ -117,20 +120,24 @@ module Trophonius
         sort_order = sort.to_json.to_s
         url =
           URI(
-            "http#{Trophonius.config.ssl == true ? 's' : ''}://#{Trophonius.config.host}/fmi/data/v1/databases/#{
-              Trophonius.config.database
-            }/layouts/#{layout_name}/records?_limit=10000000_sort=#{sort_order}#{
-              Trophonius.config.count_result_script == '' ? '' : "&script=#{Trophonius.config.count_result_script}"
-            }"
+            URI.escape(
+              "http#{Trophonius.config.ssl == true ? 's' : ''}://#{Trophonius.config.host}/fmi/data/v1/databases/#{
+                Trophonius.config.database
+              }/layouts/#{layout_name}/records?_limit=10000000_sort=#{sort_order}#{
+                Trophonius.config.count_result_script == '' ? '' : "&script=#{Trophonius.config.count_result_script}"
+              }"
+            )
           )
       else
         url =
           URI(
-            "http#{Trophonius.config.ssl == true ? 's' : ''}://#{Trophonius.config.host}/fmi/data/v1/databases/#{
-              Trophonius.config.database
-            }/layouts/#{layout_name}/records?_limit=10000000#{
-              Trophonius.config.count_result_script == '' ? '' : "&script=#{Trophonius.config.count_result_script}"
-            }"
+            URI.escape(
+              "http#{Trophonius.config.ssl == true ? 's' : ''}://#{Trophonius.config.host}/fmi/data/v1/databases/#{
+                Trophonius.config.database
+              }/layouts/#{layout_name}/records?_limit=10000000#{
+                Trophonius.config.count_result_script == '' ? '' : "&script=#{Trophonius.config.count_result_script}"
+              }"
+            )
           )
       end
       make_request(url, "Bearer #{get_token}", 'get', '{}')

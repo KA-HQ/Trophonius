@@ -101,9 +101,11 @@ module Trophonius
     def run_query(method, *args, &block)
       url =
         URI(
-          "http#{Trophonius.config.ssl == true ? 's' : ''}://#{Trophonius.config.host}/fmi/data/v1/databases/#{Trophonius.config.database}/layouts/#{
-            @trophonius_model.layout_name
-          }/_find"
+          URI.escape(
+            "http#{Trophonius.config.ssl == true ? 's' : ''}://#{Trophonius.config.host}/fmi/data/v1/databases/#{
+              Trophonius.config.database
+            }/layouts/#{@trophonius_model.layout_name}/_find"
+          )
         )
       new_field_data = @current_query.map { |_q| {} }
 

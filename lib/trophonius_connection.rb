@@ -42,7 +42,6 @@ module Trophonius
             "http#{Trophonius.config.ssl == true ? 's' : ''}://#{Trophonius.config.host}/fmi/data/v1/databases/#{Trophonius.config.database}/sessions"
           )
         )
-      puts "URL IS IN setup_connection #{url}"
       request =
         Typhoeus::Request.new(
           url,
@@ -94,7 +93,6 @@ module Trophonius
         )
       ssl_verifyhost = Trophonius.config.local_network ? 0 : 2
       ssl_verifypeer = !Trophonius.config.local_network
-      puts "URL IS IN disconnect #{url}"
 
       request =
         Typhoeus::Request.new(
@@ -147,7 +145,6 @@ module Trophonius
             }/layouts/#{Trophonius.config.layout_name}/records?_limit=1"
           )
         )
-      puts "URL IS IN test_connection #{url}"
       begin
         request =
           Typhoeus::Request.new(
