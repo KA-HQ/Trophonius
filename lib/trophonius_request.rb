@@ -53,7 +53,7 @@ module Trophonius
     #
     # @return [JSON] parsed json of the response
     def self.upload_file_request(url_param, auth, file)
-      url = URI(URI.escape(url_param.to_s))
+      url = URI(url_param.to_s)
 
       https = Net::HTTP.new(url.host, url.port)
       https.use_ssl = true

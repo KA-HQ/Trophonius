@@ -34,11 +34,9 @@ module Trophonius
 
           url =
             URI(
-              URI.escape(
-                "http#{Trophonius.config.ssl == true ? 's' : ''}://#{Trophonius.config.host}/fmi/data/v1/databases/#{
-                  Trophonius.config.database
-                }/layouts/#{layout}/_find"
-              )
+              "http#{Trophonius.config.ssl == true ? 's' : ''}://#{Trophonius.config.host}/fmi/data/v1/databases/#{
+                Trophonius.config.database
+              }/layouts/#{layout}/_find"
             )
 
           if model.translations.key?(relation[:foreign_key])
@@ -96,11 +94,9 @@ module Trophonius
 
           url =
             URI(
-              URI.escape(
-                "http#{Trophonius.config.ssl == true ? 's' : ''}://#{Trophonius.config.host}/fmi/data/v1/databases/#{
-                  Trophonius.config.database
-                }/layouts/#{layout}/_find"
-              )
+              "http#{Trophonius.config.ssl == true ? 's' : ''}://#{Trophonius.config.host}/fmi/data/v1/databases/#{
+                Trophonius.config.database
+              }/layouts/#{layout}/_find"
             )
 
           if fk_model.translations.key?(relation[:foreign_key])
@@ -160,11 +156,9 @@ module Trophonius
     def save
       url =
         URI(
-          URI.escape(
-            "http#{Trophonius.config.ssl == true ? 's' : ''}://#{Trophonius.config.host}/fmi/data/v1/databases/#{
-              Trophonius.config.database
-            }/layouts/#{layout_name}/records/#{record_id}"
-          )
+          "http#{Trophonius.config.ssl == true ? 's' : ''}://#{Trophonius.config.host}/fmi/data/v1/databases/#{Trophonius.config.database}/layouts/#{
+            layout_name
+          }/records/#{record_id}"
         )
       body = "{\"fieldData\": #{modified_fields.to_json}}"
       response = Request.make_request(url, "Bearer #{Request.get_token}", 'patch', body)
@@ -179,11 +173,9 @@ module Trophonius
     def delete
       url =
         URI(
-          URI.escape(
-            "http#{Trophonius.config.ssl == true ? 's' : ''}://#{Trophonius.config.host}/fmi/data/v1/databases/#{
-              Trophonius.config.database
-            }/layouts/#{layout_name}/records/#{record_id}"
-          )
+          "http#{Trophonius.config.ssl == true ? 's' : ''}://#{Trophonius.config.host}/fmi/data/v1/databases/#{Trophonius.config.database}/layouts/#{
+            layout_name
+          }/records/#{record_id}"
         )
       response = Request.make_request(url, "Bearer #{Request.get_token}", 'delete', '{}')
       response['messages'][0]['code'] != '0' ? Error.throw_error(response['messages'][0]['code']) : true
@@ -199,11 +191,9 @@ module Trophonius
     def update(fieldData)
       url =
         URI(
-          URI.escape(
-            "http#{Trophonius.config.ssl == true ? 's' : ''}://#{Trophonius.config.host}/fmi/data/v1/databases/#{
-              Trophonius.config.database
-            }/layouts/#{layout_name}/records/#{record_id}"
-          )
+          "http#{Trophonius.config.ssl == true ? 's' : ''}://#{Trophonius.config.host}/fmi/data/v1/databases/#{Trophonius.config.database}/layouts/#{
+            layout_name
+          }/records/#{record_id}"
         )
       fieldData.keys.each { |field| modifiable_fields[field] = fieldData[field] }
       body = "{\"fieldData\": #{fieldData.to_json}}"
@@ -237,11 +227,9 @@ module Trophonius
     def upload(container_name:, container_repetition: 1, file:)
       url =
         URI(
-          URI.escape(
-            "http#{Trophonius.config.ssl == true ? 's' : ''}://#{Trophonius.config.host}/fmi/data/v1/databases/#{
-              Trophonius.config.database
-            }/layouts/#{layout_name}/records/#{record_id}/containers/#{container_name}/#{container_repetition}"
-          )
+          "http#{Trophonius.config.ssl == true ? 's' : ''}://#{Trophonius.config.host}/fmi/data/v1/databases/#{Trophonius.config.database}/layouts/#{
+            layout_name
+          }/records/#{record_id}/containers/#{container_name}/#{container_repetition}"
         )
 
       response = Request.upload_file_request(url, "Bearer #{Request.get_token}", file)
