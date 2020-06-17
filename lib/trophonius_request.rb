@@ -86,9 +86,11 @@ module Trophonius
     def self.retrieve_first(layout_name)
       url =
         URI(
-          "http#{Trophonius.config.ssl == true ? 's' : ''}://#{Trophonius.config.host}/fmi/data/v1/databases/#{Trophonius.config.database}/layouts/#{
-            layout_name
-          }/records?_limit=1"
+          URI.escape(
+            "http#{Trophonius.config.ssl == true ? 's' : ''}://#{Trophonius.config.host}/fmi/data/v1/databases/#{
+              Trophonius.config.database
+            }/layouts/#{layout_name}/records?_limit=1"
+          )
         )
       make_request(url, "Bearer #{get_token}", 'get', '{}')
     end
@@ -100,9 +102,11 @@ module Trophonius
     def self.run_script(script, scriptparameter, layout_name)
       url =
         URI(
-          "http#{Trophonius.config.ssl == true ? 's' : ''}://#{Trophonius.config.host}/fmi/data/v1/databases/#{Trophonius.config.database}/layouts/#{
-            layout_name
-          }/records?_limit=1&script=#{script}&script.param=#{scriptparameter}"
+          URI.escape(
+            "http#{Trophonius.config.ssl == true ? 's' : ''}://#{Trophonius.config.host}/fmi/data/v1/databases/#{
+              Trophonius.config.database
+            }/layouts/#{layout_name}/records?_limit=1&script=#{script}&script.param=#{scriptparameter}"
+          )
         )
       make_request(url, "Bearer #{get_token}", 'get', '{}')
     end
