@@ -38,7 +38,9 @@ module Trophonius
       ssl_verifypeer = !Trophonius.config.local_network
       url =
         URI(
-          "http#{Trophonius.config.ssl == true ? 's' : ''}://#{Trophonius.config.host}/fmi/data/v1/databases/#{Trophonius.config.database}/sessions"
+          URI.escape(
+            "http#{Trophonius.config.ssl == true ? 's' : ''}://#{Trophonius.config.host}/fmi/data/v1/databases/#{Trophonius.config.database}/sessions"
+          )
         )
       request =
         Typhoeus::Request.new(
@@ -83,9 +85,11 @@ module Trophonius
     def self.disconnect
       url =
         URI(
-          "http#{Trophonius.config.ssl == true ? 's' : ''}://#{Trophonius.config.host}/fmi/data/v1/databases/#{Trophonius.config.database}/sessions/#{
-            Trophonius.config.redis_connection ? Trophonius::RedisManager.get_key(key: 'token') : @token
-          }"
+          URI.escape(
+            "http#{Trophonius.config.ssl == true ? 's' : ''}://#{Trophonius.config.host}/fmi/data/v1/databases/#{
+              Trophonius.config.database
+            }/sessions/#{Trophonius.config.redis_connection ? Trophonius::RedisManager.get_key(key: 'token') : @token}"
+          )
         )
       ssl_verifyhost = Trophonius.config.local_network ? 0 : 2
       ssl_verifypeer = !Trophonius.config.local_network
@@ -135,9 +139,11 @@ module Trophonius
     def self.test_connection
       url =
         URI(
-          "http#{Trophonius.config.ssl == true ? 's' : ''}://#{Trophonius.config.host}/fmi/data/v1/databases/#{Trophonius.config.database}/layouts/#{
-            Trophonius.config.layout_name
-          }/records?_limit=1"
+          URI.escape(
+            "http#{Trophonius.config.ssl == true ? 's' : ''}://#{Trophonius.config.host}/fmi/data/v1/databases/#{
+              Trophonius.config.database
+            }/layouts/#{Trophonius.config.layout_name}/records?_limit=1"
+          )
         )
       begin
         request =
