@@ -96,6 +96,26 @@ module Trophonius
     end
 
     ##
+    # Retrieves the fieldnames of a layout
+    #
+    # @return [JSON] The fieldnames of a layout
+    def self.get_layout_field_names(layout_name)
+      url =
+        URI(
+          URI.escape(
+            "http#{Trophonius.config.ssl == true ? 's' : ''}://#{Trophonius.config.host}/fmi/data/v1/databases/#{
+              Trophonius.config.database
+            }/layouts/#{layout_name}"
+          )
+        )
+      begin
+        make_request(url, "Bearer #{get_token}", 'get', '{}')['response']['fieldMetaData'].map { |field| field['name'] }
+      rescue Exception
+        Error.throw_error('1631')
+      end
+    end
+
+    ##
     # Runs a FileMaker script
     #
     # @return [JSON] The script result from FileMaker
