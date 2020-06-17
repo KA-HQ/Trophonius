@@ -84,6 +84,7 @@ module Trophonius
     #
     # @return [JSON] The first record from FileMaker
     def self.retrieve_first(layout_name)
+      puts 'ENTERING FIRST'
       url =
         URI(
           URI.escape(
@@ -92,6 +93,7 @@ module Trophonius
             }/layouts/#{layout_name}/records?_limit=1"
           )
         )
+      puts "SET URL IN FIRST: #{url}"
       make_request(url, "Bearer #{get_token}", 'get', '{}')
     end
 
