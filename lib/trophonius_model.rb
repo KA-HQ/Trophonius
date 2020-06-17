@@ -112,7 +112,17 @@ module Trophonius
     #
     # @return [Hash] translations of the fields Rails -> FileMaker
     def self.create_translations
-      self.first
+      if Trophonius::Configuration.fm_18
+        puts 'using metadata'
+        field_names = Trophonius::Request.get_metadata(layout_name)
+        field_names.each do |field|
+          @configuration.translations.merge!(
+            { "#{ActiveSupport::Inflector.parameterize(ActiveSupport::Inflector.underscore(field.to_s), separator: '_').downcase}" => "#{field}" }
+          )
+        end
+      else
+        self.first
+      end
       @configuration.translations
     end
 

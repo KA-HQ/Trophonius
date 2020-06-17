@@ -13,6 +13,7 @@ module Trophonius
     config_accessor(:username) { 'Admin' }
     config_accessor(:password) { '' }
     config_accessor(:ssl) { true }
+    config_accessor(:fm_18) { false }
     config_accessor(:count_result_script) { '' }
     config_accessor(:layout_name) { '' }
     config_accessor(:non_modifiable_fields) { [] }
