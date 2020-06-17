@@ -169,9 +169,11 @@ module Trophonius
     def self.create(fieldData)
       url =
         URI(
-          "http#{Trophonius.config.ssl == true ? 's' : ''}://#{Trophonius.config.host}/fmi/data/v1/databases/#{Trophonius.config.database}/layouts/#{
-            layout_name
-          }/records"
+          URI.escape(
+            "http#{Trophonius.config.ssl == true ? 's' : ''}://#{Trophonius.config.host}/fmi/data/v1/databases/#{
+              Trophonius.config.database
+            }/layouts/#{layout_name}/records"
+          )
         )
       new_field_data = {}
       create_translations if @configuration.translations.keys.empty?
@@ -199,9 +201,11 @@ module Trophonius
       else
         url =
           URI(
-            "http#{Trophonius.config.ssl == true ? 's' : ''}://#{Trophonius.config.host}/fmi/data/v1/databases/#{
-              Trophonius.config.database
-            }/layouts/#{layout_name}/records/#{response['response']['recordId']}"
+            URI.escape(
+              "http#{Trophonius.config.ssl == true ? 's' : ''}://#{Trophonius.config.host}/fmi/data/v1/databases/#{
+                Trophonius.config.database
+              }/layouts/#{layout_name}/records/#{response['response']['recordId']}"
+            )
           )
         ret_val = build_result(Request.make_request(url, "Bearer #{Request.get_token}", 'get', '{}')['response']['data'][0])
         ret_val.send(:define_singleton_method, 'result_count') { 1 }
@@ -219,9 +223,11 @@ module Trophonius
     def self.find_by(fieldData)
       url =
         URI(
-          "http#{Trophonius.config.ssl == true ? 's' : ''}://#{Trophonius.config.host}/fmi/data/v1/databases/#{Trophonius.config.database}/layouts/#{
-            self.layout_name
-          }/_find?_limit=1"
+          URI.escape(
+            "http#{Trophonius.config.ssl == true ? 's' : ''}://#{Trophonius.config.host}/fmi/data/v1/databases/#{
+              Trophonius.config.database
+            }/layouts/#{self.layout_name}/_find?_limit=1"
+          )
         )
       new_field_data = {}
       create_translations if @configuration.translations.keys.empty?
@@ -260,9 +266,11 @@ module Trophonius
     def self.find(record_id)
       url =
         URI(
-          "http#{Trophonius.config.ssl == true ? 's' : ''}://#{Trophonius.config.host}/fmi/data/v1/databases/#{Trophonius.config.database}/layouts/#{
-            layout_name
-          }/records/#{record_id}"
+          URI.escape(
+            "http#{Trophonius.config.ssl == true ? 's' : ''}://#{Trophonius.config.host}/fmi/data/v1/databases/#{
+              Trophonius.config.database
+            }/layouts/#{layout_name}/records/#{record_id}"
+          )
         )
       response = Request.make_request(url, "Bearer #{Request.get_token}", 'get', '{}')
       if response['messages'][0]['code'] != '0'
@@ -283,9 +291,11 @@ module Trophonius
     def self.delete(record_id)
       url =
         URI(
-          "http#{Trophonius.config.ssl == true ? 's' : ''}://#{Trophonius.config.host}/fmi/data/v1/databases/#{Trophonius.config.database}/layouts/#{
-            layout_name
-          }/records/#{record_id}"
+          URI.escape(
+            "http#{Trophonius.config.ssl == true ? 's' : ''}://#{Trophonius.config.host}/fmi/data/v1/databases/#{
+              Trophonius.config.database
+            }/layouts/#{layout_name}/records/#{record_id}"
+          )
         )
       response = Request.make_request(url, "Bearer #{Request.get_token}", 'delete', '{}')
       if response['messages'][0]['code'] != '0'
@@ -306,9 +316,11 @@ module Trophonius
     def self.edit(record_id, fieldData)
       url =
         URI(
-          "http#{Trophonius.config.ssl == true ? 's' : ''}://#{Trophonius.config.host}/fmi/data/v1/databases/#{Trophonius.config.database}/layouts/#{
-            layout_name
-          }/records/#{record_id}"
+          URI.escape(
+            "http#{Trophonius.config.ssl == true ? 's' : ''}://#{Trophonius.config.host}/fmi/data/v1/databases/#{
+              Trophonius.config.database
+            }/layouts/#{layout_name}/records/#{record_id}"
+          )
         )
       new_field_data = {}
       create_translations if @configuration.translations.keys.empty?
@@ -431,16 +443,20 @@ module Trophonius
       unless @limit.empty? || @offset.empty?
         url =
           URI(
-            "http#{Trophonius.config.ssl == true ? 's' : ''}://#{Trophonius.config.host}/fmi/data/v1/databases/#{
-              Trophonius.config.database
-            }/layouts/#{layout_name}/records?_offset=#{@offset}&_limit=#{@limit}"
+            URI.escape(
+              "http#{Trophonius.config.ssl == true ? 's' : ''}://#{Trophonius.config.host}/fmi/data/v1/databases/#{
+                Trophonius.config.database
+              }/layouts/#{layout_name}/records?_offset=#{@offset}&_limit=#{@limit}"
+            )
           )
       else
         url =
           URI(
-            "http#{Trophonius.config.ssl == true ? 's' : ''}://#{Trophonius.config.host}/fmi/data/v1/databases/#{
-              Trophonius.config.database
-            }/layouts/#{layout_name}/records?_limit=#{count == 0 ? 1_000_000 : count}"
+            URI.escape(
+              "http#{Trophonius.config.ssl == true ? 's' : ''}://#{Trophonius.config.host}/fmi/data/v1/databases/#{
+                Trophonius.config.database
+              }/layouts/#{layout_name}/records?_limit=#{count == 0 ? 1_000_000 : count}"
+            )
           )
       end
       @limit = ''

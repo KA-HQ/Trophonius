@@ -84,7 +84,6 @@ module Trophonius
     #
     # @return [JSON] The first record from FileMaker
     def self.retrieve_first(layout_name)
-      puts 'ENTERING FIRST'
       url =
         URI(
           URI.escape(
@@ -93,7 +92,6 @@ module Trophonius
             }/layouts/#{layout_name}/records?_limit=1"
           )
         )
-      puts "SET URL IN FIRST: #{url}"
       make_request(url, "Bearer #{get_token}", 'get', '{}')
     end
 
@@ -122,20 +120,24 @@ module Trophonius
         sort_order = sort.to_json.to_s
         url =
           URI(
-            "http#{Trophonius.config.ssl == true ? 's' : ''}://#{Trophonius.config.host}/fmi/data/v1/databases/#{
-              Trophonius.config.database
-            }/layouts/#{layout_name}/records?_limit=10000000_sort=#{sort_order}#{
-              Trophonius.config.count_result_script == '' ? '' : "&script=#{Trophonius.config.count_result_script}"
-            }"
+            URI.escape(
+              "http#{Trophonius.config.ssl == true ? 's' : ''}://#{Trophonius.config.host}/fmi/data/v1/databases/#{
+                Trophonius.config.database
+              }/layouts/#{layout_name}/records?_limit=10000000_sort=#{sort_order}#{
+                Trophonius.config.count_result_script == '' ? '' : "&script=#{Trophonius.config.count_result_script}"
+              }"
+            )
           )
       else
         url =
           URI(
-            "http#{Trophonius.config.ssl == true ? 's' : ''}://#{Trophonius.config.host}/fmi/data/v1/databases/#{
-              Trophonius.config.database
-            }/layouts/#{layout_name}/records?_limit=10000000#{
-              Trophonius.config.count_result_script == '' ? '' : "&script=#{Trophonius.config.count_result_script}"
-            }"
+            URI.escape(
+              "http#{Trophonius.config.ssl == true ? 's' : ''}://#{Trophonius.config.host}/fmi/data/v1/databases/#{
+                Trophonius.config.database
+              }/layouts/#{layout_name}/records?_limit=10000000#{
+                Trophonius.config.count_result_script == '' ? '' : "&script=#{Trophonius.config.count_result_script}"
+              }"
+            )
           )
       end
       make_request(url, "Bearer #{get_token}", 'get', '{}')
