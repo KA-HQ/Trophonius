@@ -112,9 +112,7 @@ module Trophonius
     #
     # @return [Hash] translations of the fields Rails -> FileMaker
     def self.create_translations
-      puts "FM18: #{Trophonius.config.fm_18}"
       if Trophonius.config.fm_18
-        puts 'using metadata'
         field_names = Trophonius::Request.get_layout_field_names(layout_name)
         field_names.each do |field|
           @configuration.translations.merge!(

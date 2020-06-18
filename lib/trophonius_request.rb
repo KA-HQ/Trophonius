@@ -37,7 +37,6 @@ module Trophonius
       begin
         JSON.parse(temp.response_body)
       rescue Exception => e
-        puts "Error was #{e}"
         Error.throw_error('1631')
       end
     end
