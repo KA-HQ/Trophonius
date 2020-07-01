@@ -29,8 +29,10 @@ module Trophonius
       response = make_request(url, token, 'post', @query.to_json)
 
       r_results = response['response']['data']
-      if response['messages'][0]['code'] != '0'
+      if response['messages'][0]['code'] != '0' && response['messages'][0]['code'] != '401'
         Error.throw_error(response['messages'][0]['code'])
+      elsif response['messages'][0]['code'] == '401'
+        return RecordSet.new(@config[:layout_name], @config[:non_modifiable_fields])
       else
         ret_val = RecordSet.new(@config[:layout_name], @config[:non_modifiable_fields])
         r_results.each do |r|
