@@ -73,8 +73,6 @@ module Trophonius
       return ret_val
     end
 
-    def run_script; end
-
     private
 
     def build_result(result)
