@@ -46,6 +46,35 @@ module Trophonius
       return ret_val
     end
 
+    def run_script(script:, scriptparameter:)
+      url =
+        URI(
+          URI.escape(
+            "http#{Trophonius.config.ssl == true ? 's' : ''}://#{Trophonius.config.host}/fmi/data/v1/databases/#{
+              Trophonius.config.database
+            }/layouts/#{@config[:layout_name]}/records?_limit=1&script=#{script}&script.param=#{scriptparameter}"
+          )
+        )
+
+      token = setup_connection
+      result = make_request(url, "Bearer #{token}", 'get', '{}')
+      ret_val = ''
+
+      if result['messages'][0]['code'] != '0'
+        Error.throw_error(result['messages'][0]['code'])
+      elsif result['response']['scriptResult'] == '403'
+        Error.throw_error(403)
+      else
+        ret_val = result['response']['scriptResult']
+      end
+
+      close_connection(token)
+
+      return ret_val
+    end
+
+    def run_script; end
+
     private
 
     def build_result(result)
