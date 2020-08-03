@@ -50,9 +50,9 @@ module Trophonius
       url =
         URI(
           URI.escape(
-            "http#{Trophonius.config.ssl == true ? 's' : ''}://#{Trophonius.config.host}/fmi/data/v1/databases/#{
-              Trophonius.config.database
-            }/layouts/#{@config[:layout_name]}/records?_limit=1&script=#{script}&script.param=#{scriptparameter}"
+            "http#{@config[:ssl] == true ? 's' : ''}://#{@config[:host]}/fmi/data/v1/databases/#{@config[:database]}/layouts/#{
+              @config[:layout_name]
+            }/records?_limit=1&script=#{script}&script.param=#{scriptparameter}"
           )
         )
 
