@@ -170,7 +170,8 @@ module Trophonius
           )
         )
 
-      Request.make_request(url, "Bearer #{Request.get_token}", 'get', '{}')
+      result = Request.make_request(url, "Bearer #{Request.get_token}", 'get', '{}')
+
       if result['messages'][0]['code'] != '0'
         Error.throw_error(result['messages'][0]['code'])
       elsif result['response']['scriptResult'] == '403'
