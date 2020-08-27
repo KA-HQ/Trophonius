@@ -153,6 +153,35 @@ module Trophonius
     end
 
     ##
+    # Runs a FileMaker script from the context of the Model.
+    #
+    # @param [String] script: the FileMaker script to run
+    #
+    # @param [String] scriptparameter: the parameter required by the FileMaker script
+    #
+    # @return [String]: string representing the script result returned by FileMaker
+    def run_script(script: '', scriptparameter: '')
+      url =
+        URI(
+          URI.escape(
+            "http#{Trophonius.config.ssl == true ? 's' : ''}://#{Trophonius.config.host}/fmi/data/v1/databases/#{
+              Trophonius.config.database
+            }/layouts/#{layout_name}/records/#{record_id}?script=#{script}&script.param=#{scriptparameter}"
+          )
+        )
+
+      Request.make_request(url, "Bearer #{get_token}", 'get', '{}')
+      if result['messages'][0]['code'] != '0'
+        Error.throw_error(result['messages'][0]['code'])
+      elsif result['response']['scriptResult'] == '403'
+        Error.throw_error(403)
+      else
+        ret_val = result['response']['scriptResult']
+        return ret_val
+      end
+    end
+
+    ##
     # Saves the last changes made to the Record to FileMaker.
     # Throws a FileMaker error if save failed
     #

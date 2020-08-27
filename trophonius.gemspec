@@ -2,7 +2,7 @@
 
 Gem::Specification.new do |s|
   s.name = 'trophonius'
-  s.version = '1.2.7.2.2'
+  s.version = '1.2.7.3.1'
   s.authors = 'Kempen Automatisering'
   s.homepage = 'https://github.com/Willem-Jan/Trophonius'
   s.date = '2019-12-16'
