@@ -178,7 +178,7 @@ module Trophonius
         Error.throw_error(403)
       else
         ret_val = result['response']['scriptResult']
-        return ret_val
+        return ret_val || result
       end
     end
 
