@@ -207,7 +207,12 @@ module Trophonius
         )
       end
 
-      body = "{\"fieldData\": #{new_field_data.to_json}, \"portalData\": {#{new_portal_data.to_json}}}"
+      body =
+        if new_portal_data != {}
+          "{\"fieldData\": #{new_field_data.to_json}, \"portalData\": {#{new_portal_data.to_json}}}"
+        else
+          "{\"fieldData\": #{new_field_data.to_json} }"
+        end
       response = Request.make_request(url, "Bearer #{Request.get_token}", 'post', body)
       if response['messages'][0]['code'] != '0'
         if response['messages'][0]['code'] == '102'
