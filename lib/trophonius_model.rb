@@ -175,7 +175,7 @@ module Trophonius
     #
     # @return [Record] the created record
     #   Model.create(fieldOne: "Data")
-    def self.create(fieldData, portalData: '')
+    def self.create(fieldData, portalData: {})
       url =
         URI(
           URI.escape(
@@ -194,7 +194,20 @@ module Trophonius
         end
       end
 
-      body = "{\"fieldData\": #{new_field_data.to_json}, \"portalData\": #{portalData.to_json}}"
+      new_portal_data = {}
+      portalData.each do |portal_name, portal_values|
+        new_portal_data.merge!(
+          portal_name =>
+            portal_values.map do |record|
+              record.inject({}) do |new_hash, (key, value)|
+                new_hash["#{portal_name}::#{key}"] = value
+                new_hash
+              end
+            end
+        )
+      end
+
+      body = "{\"fieldData\": #{new_field_data.to_json}, \"portalData\": {#{new_portal_data.to_json}}}"
       response = Request.make_request(url, "Bearer #{Request.get_token}", 'post', body)
       if response['messages'][0]['code'] != '0'
         if response['messages'][0]['code'] == '102'
