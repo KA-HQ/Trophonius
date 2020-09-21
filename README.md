@@ -77,7 +77,19 @@ To create a new record in the FileMaker database you only have to call the creat
   MyModel.create(field_one: "Data", number_field: 1)
 ```
 
-The new record will be created immediately and filled with the provided data. The fieldnames are the same as the names in FileMaker. If the fieldname in FileMaker contains non-word characters, the fieldname should be in quotes. This method returns the created record as a Trophonius::Record instance.
+The new record will be created immediately and filled with the provided data. The fieldnames are the same as the names in FileMaker. If the fieldname in FileMaker contains non-word characters, the fieldname should be in quotes. This method returns the created record as a Trophonius::Record instance. If you have a portal on your layout, you can fill the portal by adding a portalData parameter:
+
+```ruby
+  MyModel.create(field_one: "Data", number_field: 1, portalData: {
+    "MyPortalOccurrenceName" => [
+      { "portalField" => "value" },
+      { "portalField" => "value2" },
+      { "portalField" => "value4" }
+    ]
+  })
+```
+
+The field in your portalData parameter have to be the same as the fieldnames in FileMaker, currently the translations don't work. You should also add
 
 ## Get records
 
@@ -98,15 +110,15 @@ If you want a more restricted set of records or a specific record you might want
   end
 ```
 
- If a condition requires multiple statements to be true, you can simply add multiple fields in the same where:
- ```ruby
-  record = MyModel.find(100) # Record with recordID 100 (if available)
-  MyModel.where(number_field: 100, date_field: Date.today.strftime('%m/%d/%Y')).to_a # Records where NumberField is 100 and date_field contains the date of today(if any)
-  record.portal.each do |portal_record|
-    portal_record.child_field
-  end
+If a condition requires multiple statements to be true, you can simply add multiple fields in the same where:
+
+```ruby
+ record = MyModel.find(100) # Record with recordID 100 (if available)
+ MyModel.where(number_field: 100, date_field: Date.today.strftime('%m/%d/%Y')).to_a # Records where NumberField is 100 and date_field contains the date of today(if any)
+ record.portal.each do |portal_record|
+   portal_record.child_field
+ end
 ```
- 
 
 ### Omit records
 
@@ -179,13 +191,16 @@ The FileMaker Data API requires dates to be formatted as MM/DD/YYYY. To make thi
 ## Disconnecting from the Data API
 
 To close the connection to the FileMaker server simply call:
+
 ```ruby
   Trophonius::Connection.disconnect
 ```
+
 # To do
 
 - [x] Better portal support (get supported)
-- [ ] Support portal set field directly
+- [x] Support portal set field directly (create)
+- [ ] Support portal set field directly (other actions)
 - [x] Better chainable where queries
 - [x] Omit queries
 - [x] Or queries
