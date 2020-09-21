@@ -209,8 +209,8 @@ module Trophonius
 
       body =
         if new_portal_data != {}
-          puts "{\"fieldData\": #{new_field_data.to_json}, \"portalData\": {#{new_portal_data.to_json}}}"
-          "{\"fieldData\": #{new_field_data.to_json}, \"portalData\": {#{new_portal_data.to_json}}}"
+          puts "{\"fieldData\": #{new_field_data.to_json}, \"portalData\": #{new_portal_data.to_json}}"
+          "{\"fieldData\": #{new_field_data.to_json}, \"portalData\": #{new_portal_data.to_json}}"
         else
           "{\"fieldData\": #{new_field_data.to_json} }"
         end
