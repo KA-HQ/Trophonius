@@ -30,6 +30,7 @@ module Trophonius
 
       r_results = response['response']['data']
       if response['messages'][0]['code'] != '0' && response['messages'][0]['code'] != '401'
+        close_connection(token)
         Error.throw_error(response['messages'][0]['code'])
       elsif response['messages'][0]['code'] == '401'
         close_connection(token)
@@ -62,8 +63,10 @@ module Trophonius
       ret_val = ''
 
       if result['messages'][0]['code'] != '0'
+        close_connection(token)
         Error.throw_error(result['messages'][0]['code'])
       elsif result['response']['scriptResult'] == '403'
+        close_connection(token)
         Error.throw_error(403)
       else
         ret_val = result['response']['scriptResult']
@@ -146,6 +149,7 @@ module Trophonius
       begin
         JSON.parse(temp.response_body)
       rescue Exception => e
+        close_connection(token)
         Error.throw_error('1631')
       end
     end
