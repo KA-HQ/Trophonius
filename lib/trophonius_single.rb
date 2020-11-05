@@ -32,6 +32,7 @@ module Trophonius
       if response['messages'][0]['code'] != '0' && response['messages'][0]['code'] != '401'
         Error.throw_error(response['messages'][0]['code'])
       elsif response['messages'][0]['code'] == '401'
+        close_connection(token)
         return RecordSet.new(@config[:layout_name], @config[:non_modifiable_fields])
       else
         ret_val = RecordSet.new(@config[:layout_name], @config[:non_modifiable_fields])
