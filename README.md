@@ -208,7 +208,8 @@ To close the connection to the FileMaker server simply call:
 - [x] More container support
 - [x] Remove non_modifiable_fields requirement from Model
 - [x] FileMaker sorting
-- [ ] has_many/belongs_to relationships between models
+- [x] has_many/belongs_to relationships between models
+- [ ] has_many/belongs_to readme
 
 # Contributing
 
