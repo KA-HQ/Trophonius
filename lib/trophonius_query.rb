@@ -43,6 +43,24 @@ module Trophonius
     end
 
     ##
+    # Returns the current portal limits
+    #
+    # @return [Hash] Hash representing the portal limits
+    def build_portal_limits()
+      @portal_limits ||= {}
+    end
+
+    ##
+    # Adds a portal limit to the request
+    #
+    # @param [args] arguments containing a Hash with the format {portalName: requiredLimit}
+    # @return [Trophonius::Model] updated base model
+    def set_portal_limits(args)
+      args[1].current_query.build_portal_limits.merge!(args[0])
+      args[1]
+    end
+
+    ##
     # Adds a find request to the original query, resulting in an "Or" find-request for FileMaker
     #
     # @param [args] arguments containing a Hash containing the FileMaker find request, and the base model object for the query
@@ -107,6 +125,7 @@ module Trophonius
             }/layouts/#{@trophonius_model.layout_name}/_find"
           )
         )
+
       new_field_data = @current_query.map { |_q| {} }
 
       @trophonius_model.create_translations if @trophonius_model.translations.keys.empty?
@@ -120,21 +139,23 @@ module Trophonius
         end
       end
       if @offset.nil? || @limit.nil? || @offset == '' || @limit == '' || @offset == 0 || @limit == 0
-        body =
-          if @current_sort.nil?
-            { query: new_field_data, limit: '100000' }.to_json
-          else
-            { query: new_field_data, sort: @current_sort, limit: '100000' }.to_json
-          end
+        body = @current_sort.nil? ? { query: new_field_data, limit: '100000' } : { query: new_field_data, sort: @current_sort, limit: '100000' }
       else
         body =
           if @current_sort.nil?
-            { query: new_field_data, limit: @limit.to_s, offset: @offset.to_s }.to_json
+            { query: new_field_data, limit: @limit.to_s, offset: @offset.to_s }
           else
-            { query: new_field_data, sort: @current_sort, limit: @limit.to_s, offset: @offset.to_s }.to_json
+            { query: new_field_data, sort: @current_sort, limit: @limit.to_s, offset: @offset.to_s }
           end
       end
 
+      if @portal_limits
+        portal_hash = { portal: @portal_limits.map { |portal_name, limit| "#{portal_name}" } }
+        body.merge!(portal_hash)
+        @portal_limits.each { |portal_name, limit| body.merge!({ "limit.#{portal_name}" => limit.to_s }) }
+      end
+
+      body = body.to_json
       response = Request.make_request(url, "Bearer #{Request.get_token}", 'post', body)
       if response['messages'][0]['code'] != '0'
         if response['messages'][0]['code'] == '101' || response['messages'][0]['code'] == '401'
