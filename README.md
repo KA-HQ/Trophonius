@@ -137,7 +137,7 @@ If you want to find records without the specified query you can use the "not" me
 ### Sorted find request
 
 ```ruby
-  MyModel.where(number_field: 100).sort(number_field: 'ascending').to_a # Records where NumberField is 100 sorted by number_field ascending (if any)
+  MyModel.where(number_field: 100).sort(number_field: 'ascend').to_a # Records where NumberField is 100 sorted by number_field ascending (if any)
 ```
 
 ## Update records
