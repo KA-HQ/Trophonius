@@ -30,7 +30,7 @@ And run bundle install
 # Configuration
 
 To begin using the gem create a configuration file in the initializers folder called trophonius.rb.
-This file should contain all the information the Data-API needs to setup a connection to your database. Example file:
+This file should contain all the information the Data-API needs to setup a connection to your database.
 
 To generate this file automatically in a rails app you can use the generator:
 
@@ -40,6 +40,7 @@ rails g trophonius --host location_to.your_filemakerserver.com --database Name_o
 
 Where --host should contain a url to your FileMaker server and --database should contain the name of your database
 
+Example of the initializer file:
 ```ruby
 Trophonius.configure do |config|
   config.host = "location_to.your_filemakerserver.com"
