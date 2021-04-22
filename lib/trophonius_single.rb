@@ -48,6 +48,38 @@ module Trophonius
       return ret_val
     end
 
+    def first
+      url =
+        URI(
+          URI.escape(
+            "http#{@config[:ssl] == true ? 's' : ''}://#{@config[:host]}/fmi/data/v1/databases/#{@config[:database]}/layouts/#{
+              @config[:layout_name]
+            }/records?_limit=1"
+          )
+        )
+
+      token = setup_connection
+      response = make_request(url, token, 'get', @query.to_json)
+
+      r_results = response['response']['data']
+      if response['messages'][0]['code'] != '0' && response['messages'][0]['code'] != '401'
+        close_connection(token)
+        Error.throw_error(response['messages'][0]['code'])
+      elsif response['messages'][0]['code'] == '401'
+        close_connection(token)
+        return RecordSet.new(@config[:layout_name], @config[:non_modifiable_fields])
+      else
+        ret_val = RecordSet.new(@config[:layout_name], @config[:non_modifiable_fields])
+        r_results.each do |r|
+          hash = build_result(r)
+          ret_val << hash
+        end
+      end
+      close_connection(token)
+
+      return ret_val
+    end
+
     def run_script(script:, scriptparameter:)
       url =
         URI(
