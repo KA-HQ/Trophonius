@@ -7,6 +7,7 @@ require 'trophonius_error'
 module Trophonius
   class Trophonius::Query
     attr_reader :response
+    attr_accessor :presort_script, :presort_scriptparam, :prerequest_script, :prerequest_scriptparam, :post_request_script, :post_request_scriptparam
 
     ##
     # Creates a new instance of the Trophonius::Query class
@@ -20,6 +21,12 @@ module Trophonius
       @trophonius_model = trophonius_model
       @limit = limit
       @offset = offset
+      @presort_script = ''
+      @presort_scriptparam = ''
+      @prerequest_script = ''
+      @prerequest_scriptparam = ''
+      @post_request_script = ''
+      @post_request_scriptparam = ''
     end
 
     ##
@@ -57,6 +64,66 @@ module Trophonius
     # @return [Trophonius::Model] updated base model
     def set_portal_limits(args)
       args[1].current_query.build_portal_limits.merge!(args[0])
+      args[1]
+    end
+
+    ##
+    # Adds a post-request script to the request
+    #
+    # @param [args] arguments containing a String with the name of the script
+    # @return [Trophonius::Model] updated base model
+    def set_post_request_script(args)
+      args[1].current_query.post_request_script = args[0]
+      args[1]
+    end
+
+    ##
+    # Adds a post-request scriptparameter to the request
+    #
+    # @param [args] arguments containing a String with the name of the scriptparameter
+    # @return [Trophonius::Model] updated base model
+    def set_post_request_script_param(args)
+      args[1].current_query.post_request_scriptparam = args[0]
+      args[1]
+    end
+
+    ##
+    # Adds a pre-request script to the request
+    #
+    # @param [args] arguments containing a String with the name of the script
+    # @return [Trophonius::Model] updated base model
+    def set_prerequest_script(args)
+      args[1].current_query.prerequest_script = args[0]
+      args[1]
+    end
+
+    ##
+    # Adds a pre-request scriptparameter to the request
+    #
+    # @param [args] arguments containing a String with the name of the scriptparameter
+    # @return [Trophonius::Model] updated base model
+    def set_prerequest_script_param(args)
+      args[1].current_query.prerequest_scriptparam = args[0]
+      args[1]
+    end
+
+    ##
+    # Adds a pre-sort script to the request
+    #
+    # @param [args] arguments containing a String with the name of the script
+    # @return [Trophonius::Model] updated base model
+    def set_presort_script(args)
+      args[1].current_query.presort_script = args[0]
+      args[1]
+    end
+
+    ##
+    # Adds a pre-request scriptparameter to the request
+    #
+    # @param [args] arguments containing a String with the name of the scriptparameter
+    # @return [Trophonius::Model] updated base model
+    def set_presort_script_param(args)
+      args[1].current_query.presort_scriptparam = args[0]
       args[1]
     end
 
@@ -125,7 +192,6 @@ module Trophonius
             }/layouts/#{@trophonius_model.layout_name}/_find"
           )
         )
-
       new_field_data = @current_query.map { |_q| {} }
 
       @trophonius_model.create_translations if @trophonius_model.translations.keys.empty?
@@ -149,6 +215,21 @@ module Trophonius
           end
       end
 
+      if @post_request_script.present?
+        body.merge!(script: @post_request_script)
+        body.merge!('script.param' => @post_request_script_param) if @post_request_script_param.present?
+      end
+
+      if @prerequest_script.present?
+        body.merge!(script: @prerequest_script)
+        body.merge!('script.param' => @prerequest_script_param) if @prerequest_script_param.present?
+      end
+
+      if @presort_script.present?
+        body.merge!(script: @presort_script)
+        body.merge!('script.param' => @presort_script_param) if @presort_script_param.present?
+      end
+
       if @portal_limits
         portal_hash = { portal: @portal_limits.map { |portal_name, limit| "#{portal_name}" } }
         body.merge!(portal_hash)
@@ -157,6 +238,7 @@ module Trophonius
 
       body = body.to_json
       response = Request.make_request(url, "Bearer #{Request.get_token}", 'post', body)
+
       if response['messages'][0]['code'] != '0'
         if response['messages'][0]['code'] == '101' || response['messages'][0]['code'] == '401'
           resp = RecordSet.new(@trophonius_model.layout_name, @trophonius_model.non_modifiable_fields).send(method, *args, &block)
@@ -178,7 +260,26 @@ module Trophonius
       else
         r_results = response['response']['data']
         ret_val = RecordSet.new(@trophonius_model.layout_name, @trophonius_model.non_modifiable_fields)
+
         r_results.each do |r|
+          r['fieldData'].merge!('post_request_script_result' => response['response']['scriptResult']) if response['response']['scriptResult']
+
+          if response['response']['scriptResult.presort']
+            r['fieldData'].merge!('presort_script_result' => response['response']['scriptResult.presort'])
+          end
+
+          if response['response']['scriptResult.prerequest']
+            r['fieldData'].merge!('prerequest_script_result' => response['response']['scriptResult.prerequest'])
+          end
+
+          r['fieldData'].merge!('post_request_script_error' => response['response']['scriptError']) if response['response']['scriptError']
+
+          r['fieldData'].merge!('presort_script_error' => response['response']['scriptError.presort']) if response['response']['scriptError.presort']
+
+          if response['response']['scriptError.prerequest']
+            r['fieldData'].merge!('prerequest_script_error' => response['response']['scriptError.prerequest'])
+          end
+
           hash = @trophonius_model.build_result(r)
           ret_val << hash
         end
