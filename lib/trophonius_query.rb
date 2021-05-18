@@ -217,17 +217,17 @@ module Trophonius
 
       if @post_request_script.present?
         body.merge!(script: @post_request_script)
-        body.merge!('script.param' => @post_request_script_param) if @post_request_script_param.present?
+        body.merge!('script.param' => @post_request_script_param) if @post_request_scriptparam.present?
       end
 
       if @prerequest_script.present?
         body.merge!(script: @prerequest_script)
-        body.merge!('script.param' => @prerequest_script_param) if @prerequest_script_param.present?
+        body.merge!('script.param' => @prerequest_script_param) if @prerequest_scriptparam.present?
       end
 
       if @presort_script.present?
         body.merge!(script: @presort_script)
-        body.merge!('script.param' => @presort_script_param) if @presort_script_param.present?
+        body.merge!('script.param' => @presort_script_param) if @presort_scriptparam.present?
       end
 
       if @portal_limits
