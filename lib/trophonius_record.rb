@@ -150,6 +150,12 @@ module Trophonius
       else
         super
       end
+    rescue NameError => e
+      if e.message.include?('constant')
+        Error.throw_error('102', e.message.split(' ')[-1], layout_name)
+      else
+        raise e
+      end
     end
 
     ##
