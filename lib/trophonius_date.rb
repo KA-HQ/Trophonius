@@ -4,9 +4,8 @@ class Date
   end
 
   def self.from_fm(fm_date)
-    Date.strptime(self, '%m/%d/%Y')
+    Date.strptime(fm_date, '%m/%d/%Y')
   end
 
   alias convert_to_fm to_fm
-  alias convert_from_fm from_fm
 end
