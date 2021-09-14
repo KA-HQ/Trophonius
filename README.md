@@ -204,6 +204,7 @@ The FileMaker Data API requires dates to be formatted as MM/DD/YYYY. To make thi
 ```ruby
  Date.today.to_fm
  Time.now.to_fm
+ Date.from_fm(filemakerDateField)
 ```
 
 ## Disconnecting from the Data API
