@@ -91,7 +91,7 @@ module Trophonius
         )
 
       token = setup_connection
-      result = make_request(url, "Bearer #{token}", 'get', '{}')
+      result = make_request(url, "#{token}", 'get', '{}')
       ret_val = ''
 
       if result['messages'][0]['code'] != '0'
