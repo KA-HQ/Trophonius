@@ -3,6 +3,7 @@ require 'trophonius_model'
 require 'trophonius_config'
 require 'trophonius_date'
 require 'trophonius_time'
+require 'trophonius_date_time'
 
 module Trophonius # :nodoc:
   def self.configuration
