@@ -32,9 +32,10 @@ module Trophonius
           layout = model.layout_name
           model.create_translations if model.translations.keys.empty?
 
+          uri = URI::RFC2396_Parser.new
           url =
             URI(
-              URI.escape(
+              uri.escape(
                 "http#{Trophonius.config.ssl == true ? 's' : ''}://#{Trophonius.config.host}/fmi/data/v1/databases/#{
                   Trophonius.config.database
                 }/layouts/#{layout}/_find"
@@ -94,9 +95,10 @@ module Trophonius
           layout = pk_model.layout_name
           pk_model.create_translations if pk_model.translations.keys.empty?
 
+          uri = URI::RFC2396_Parser.new
           url =
             URI(
-              URI.escape(
+              uri.escape(
                 "http#{Trophonius.config.ssl == true ? 's' : ''}://#{Trophonius.config.host}/fmi/data/v1/databases/#{
                   Trophonius.config.database
                 }/layouts/#{layout}/_find"
@@ -167,9 +169,10 @@ module Trophonius
     #
     # @return [String]: string representing the script result returned by FileMaker
     def run_script(script: '', scriptparameter: '')
+      uri = URI::RFC2396_Parser.new
       url =
         URI(
-          URI.escape(
+          uri.escape(
             "http#{Trophonius.config.ssl == true ? 's' : ''}://#{Trophonius.config.host}/fmi/data/v1/databases/#{
               Trophonius.config.database
             }/layouts/#{layout_name}/records/#{record_id}?script=#{script}&script.param=#{scriptparameter}"
@@ -194,9 +197,10 @@ module Trophonius
     #
     # @return [True] if successful
     def save
+      uri = URI::RFC2396_Parser.new
       url =
         URI(
-          URI.escape(
+          uri.escape(
             "http#{Trophonius.config.ssl == true ? 's' : ''}://#{Trophonius.config.host}/fmi/data/v1/databases/#{
               Trophonius.config.database
             }/layouts/#{layout_name}/records/#{record_id}"
@@ -213,9 +217,10 @@ module Trophonius
     #
     # @return [True] if successful
     def delete
+      uri = URI::RFC2396_Parser.new
       url =
         URI(
-          URI.escape(
+          uri.escape(
             "http#{Trophonius.config.ssl == true ? 's' : ''}://#{Trophonius.config.host}/fmi/data/v1/databases/#{
               Trophonius.config.database
             }/layouts/#{layout_name}/records/#{record_id}"
@@ -233,9 +238,10 @@ module Trophonius
     #
     # @return [True] if successful
     def update(fieldData)
+      uri = URI::RFC2396_Parser.new
       url =
         URI(
-          URI.escape(
+          uri.escape(
             "http#{Trophonius.config.ssl == true ? 's' : ''}://#{Trophonius.config.host}/fmi/data/v1/databases/#{
               Trophonius.config.database
             }/layouts/#{layout_name}/records/#{record_id}"
@@ -271,9 +277,10 @@ module Trophonius
     #
     # @return [True] if successful
     def upload(container_name:, container_repetition: 1, file:)
+      uri = URI::RFC2396_Parser.new
       url =
         URI(
-          URI.escape(
+          uri.escape(
             "http#{Trophonius.config.ssl == true ? 's' : ''}://#{Trophonius.config.host}/fmi/data/v1/databases/#{
               Trophonius.config.database
             }/layouts/#{layout_name}/records/#{record_id}/containers/#{container_name}/#{container_repetition}"

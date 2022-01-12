@@ -36,9 +36,10 @@ module Trophonius
       end
       ssl_verifyhost = Trophonius.config.local_network ? 0 : 2
       ssl_verifypeer = !Trophonius.config.local_network
+      uri = URI::RFC2396_Parser.new
       url =
         URI(
-          URI.escape(
+          uri.escape(
             "http#{Trophonius.config.ssl == true ? 's' : ''}://#{Trophonius.config.host}/fmi/data/v1/databases/#{Trophonius.config.database}/sessions"
           )
         )
@@ -83,9 +84,10 @@ module Trophonius
     # Disconnects from the FileMaker server
     #
     def self.disconnect
+      uri = URI::RFC2396_Parser.new
       url =
         URI(
-          URI.escape(
+          uri.escape(
             "http#{Trophonius.config.ssl == true ? 's' : ''}://#{Trophonius.config.host}/fmi/data/v1/databases/#{
               Trophonius.config.database
             }/sessions/#{Trophonius.config.redis_connection ? Trophonius::RedisManager.get_key(key: 'token') : @token}"
@@ -137,9 +139,10 @@ module Trophonius
     # Tests whether the FileMaker token is still valid
     # @return [Boolean] True if the token is valid False if invalid
     def self.test_connection
+      uri = URI::RFC2396_Parser.new
       url =
         URI(
-          URI.escape(
+          uri.escape(
             "http#{Trophonius.config.ssl == true ? 's' : ''}://#{Trophonius.config.host}/fmi/data/v1/databases/#{
               Trophonius.config.database
             }/layouts/#{Trophonius.config.layout_name}/records?_limit=1"

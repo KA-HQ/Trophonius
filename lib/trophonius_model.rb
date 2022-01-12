@@ -176,9 +176,10 @@ module Trophonius
     # @return [Record] the created record
     #   Model.create(fieldOne: "Data")
     def self.create(fieldData, portalData: {})
+      uri = URI::RFC2396_Parser.new
       url =
         URI(
-          URI.escape(
+          uri.escape(
             "http#{Trophonius.config.ssl == true ? 's' : ''}://#{Trophonius.config.host}/fmi/data/v1/databases/#{
               Trophonius.config.database
             }/layouts/#{layout_name}/records"
@@ -229,7 +230,7 @@ module Trophonius
       else
         url =
           URI(
-            URI.escape(
+            uri.escape(
               "http#{Trophonius.config.ssl == true ? 's' : ''}://#{Trophonius.config.host}/fmi/data/v1/databases/#{
                 Trophonius.config.database
               }/layouts/#{layout_name}/records/#{response['response']['recordId']}"
@@ -249,9 +250,10 @@ module Trophonius
     # @return [Record] a Record object that correspond to FileMaker record fitting the find request
     #   Model.find_by(fieldOne: "Data")
     def self.find_by(fieldData)
+      uri = URI::RFC2396_Parser.new
       url =
         URI(
-          URI.escape(
+          uri.escape(
             "http#{Trophonius.config.ssl == true ? 's' : ''}://#{Trophonius.config.host}/fmi/data/v1/databases/#{
               Trophonius.config.database
             }/layouts/#{self.layout_name}/_find?_limit=1"
@@ -292,9 +294,10 @@ module Trophonius
     #
     # @return [Record] the record
     def self.find(record_id)
+      uri = URI::RFC2396_Parser.new
       url =
         URI(
-          URI.escape(
+          uri.escape(
             "http#{Trophonius.config.ssl == true ? 's' : ''}://#{Trophonius.config.host}/fmi/data/v1/databases/#{
               Trophonius.config.database
             }/layouts/#{layout_name}/records/#{record_id}"
@@ -317,9 +320,10 @@ module Trophonius
     #
     # @return [Boolean] True if the delete was successful
     def self.delete(record_id)
+      uri = URI::RFC2396_Parser.new
       url =
         URI(
-          URI.escape(
+          uri.escape(
             "http#{Trophonius.config.ssl == true ? 's' : ''}://#{Trophonius.config.host}/fmi/data/v1/databases/#{
               Trophonius.config.database
             }/layouts/#{layout_name}/records/#{record_id}"
@@ -342,9 +346,10 @@ module Trophonius
     #
     # @return [Boolean] True if the delete was successful
     def self.edit(record_id, fieldData)
+      uri = URI::RFC2396_Parser.new
       url =
         URI(
-          URI.escape(
+          uri.escape(
             "http#{Trophonius.config.ssl == true ? 's' : ''}://#{Trophonius.config.host}/fmi/data/v1/databases/#{
               Trophonius.config.database
             }/layouts/#{layout_name}/records/#{record_id}"
@@ -466,12 +471,13 @@ module Trophonius
     #
     # @return [RecordSet]: a RecordSet containing all the Record objects that correspond to the FileMaker records.
     def self.all(sort: {})
+      uri = URI::RFC2396_Parser.new
       results = Request.retrieve_all(layout_name, sort)
       count = results['response']['scriptResult'].to_i
       unless @limit.empty? || @offset.empty?
         url =
           URI(
-            URI.escape(
+            uri.escape(
               "http#{Trophonius.config.ssl == true ? 's' : ''}://#{Trophonius.config.host}/fmi/data/v1/databases/#{
                 Trophonius.config.database
               }/layouts/#{layout_name}/records?_offset=#{@offset}&_limit=#{@limit}"
@@ -480,7 +486,7 @@ module Trophonius
       else
         url =
           URI(
-            URI.escape(
+            uri.escape(
               "http#{Trophonius.config.ssl == true ? 's' : ''}://#{Trophonius.config.host}/fmi/data/v1/databases/#{
                 Trophonius.config.database
               }/layouts/#{layout_name}/records?_limit=#{count == 0 ? 1_000_000 : count}"

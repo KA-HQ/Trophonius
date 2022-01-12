@@ -83,9 +83,10 @@ module Trophonius
     #
     # @return [JSON] The first record from FileMaker
     def self.retrieve_first(layout_name)
+      uri = URI::RFC2396_Parser.new
       url =
         URI(
-          URI.escape(
+          uri.escape(
             "http#{Trophonius.config.ssl == true ? 's' : ''}://#{Trophonius.config.host}/fmi/data/v1/databases/#{
               Trophonius.config.database
             }/layouts/#{layout_name}/records?_limit=1"
@@ -99,9 +100,10 @@ module Trophonius
     #
     # @return [JSON] The fieldnames of a layout
     def self.get_layout_field_names(layout_name)
+      uri = URI::RFC2396_Parser.new
       url =
         URI(
-          URI.escape(
+          uri.escape(
             "http#{Trophonius.config.ssl == true ? 's' : ''}://#{Trophonius.config.host}/fmi/data/v1/databases/#{
               Trophonius.config.database
             }/layouts/#{layout_name}"
@@ -119,9 +121,10 @@ module Trophonius
     #
     # @return [JSON] The script result from FileMaker
     def self.run_script(script, scriptparameter, layout_name)
+      uri = URI::RFC2396_Parser.new
       url =
         URI(
-          URI.escape(
+          uri.escape(
             "http#{Trophonius.config.ssl == true ? 's' : ''}://#{Trophonius.config.host}/fmi/data/v1/databases/#{
               Trophonius.config.database
             }/layouts/#{layout_name}/records?_limit=1&script=#{script}&script.param=#{scriptparameter}"
@@ -135,11 +138,12 @@ module Trophonius
     #
     # @return [JSON] The first 10000000 records from FileMaker
     def self.retrieve_all(layout_name, sort)
+      uri = URI::RFC2396_Parser.new
       if !sort.empty?
         sort_order = sort.to_json.to_s
         url =
           URI(
-            URI.escape(
+            uri.escape(
               "http#{Trophonius.config.ssl == true ? 's' : ''}://#{Trophonius.config.host}/fmi/data/v1/databases/#{
                 Trophonius.config.database
               }/layouts/#{layout_name}/records?_limit=10000000_sort=#{sort_order}#{
@@ -150,7 +154,7 @@ module Trophonius
       else
         url =
           URI(
-            URI.escape(
+            uri.escape(
               "http#{Trophonius.config.ssl == true ? 's' : ''}://#{Trophonius.config.host}/fmi/data/v1/databases/#{
                 Trophonius.config.database
               }/layouts/#{layout_name}/records?_limit=10000000#{

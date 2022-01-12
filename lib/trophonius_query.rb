@@ -184,9 +184,10 @@ module Trophonius
     #
     # @return Response of the called method
     def run_query(method, *args, &block)
+      uri = URI::RFC2396_Parser.new
       url =
         URI(
-          URI.escape(
+          uri.escape(
             "http#{Trophonius.config.ssl == true ? 's' : ''}://#{Trophonius.config.host}/fmi/data/v1/databases/#{
               Trophonius.config.database
             }/layouts/#{@trophonius_model.layout_name}/_find"

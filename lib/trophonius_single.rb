@@ -15,9 +15,10 @@ module Trophonius
     end
 
     def where(fieldData)
+      uri = URI::RFC2396_Parser.new
       url =
         URI(
-          URI.escape(
+          uri.escape(
             "http#{@config[:ssl] == true ? 's' : ''}://#{@config[:host]}/fmi/data/v1/databases/#{@config[:database]}/layouts/#{
               @config[:layout_name]
             }/_find"
@@ -49,9 +50,10 @@ module Trophonius
     end
 
     def first
+      uri = URI::RFC2396_Parser.new
       url =
         URI(
-          URI.escape(
+          uri.escape(
             "http#{@config[:ssl] == true ? 's' : ''}://#{@config[:host]}/fmi/data/v1/databases/#{@config[:database]}/layouts/#{
               @config[:layout_name]
             }/records?_limit=1"
@@ -81,9 +83,10 @@ module Trophonius
     end
 
     def run_script(script:, scriptparameter:)
+      uri = URI::RFC2396_Parser.new
       url =
         URI(
-          URI.escape(
+          uri.escape(
             "http#{@config[:ssl] == true ? 's' : ''}://#{@config[:host]}/fmi/data/v1/databases/#{@config[:database]}/layouts/#{
               @config[:layout_name]
             }/records?_limit=1&script=#{script}&script.param=#{scriptparameter}"
@@ -189,7 +192,8 @@ module Trophonius
     def setup_connection
       ssl_verifyhost = @config[:local_network] ? 0 : 2
       ssl_verifypeer = !@config[:local_network]
-      url = URI(URI.escape("http#{@config[:ssl] == true ? 's' : ''}://#{@config[:host]}/fmi/data/v1/databases/#{@config[:database]}/sessions"))
+      uri = URI::RFC2396_Parser.new
+      url = URI(uri.escape("http#{@config[:ssl] == true ? 's' : ''}://#{@config[:host]}/fmi/data/v1/databases/#{@config[:database]}/sessions"))
       request =
         Typhoeus::Request.new(
           url,
@@ -220,8 +224,9 @@ module Trophonius
     end
 
     def close_connection(token)
+      uri = URI::RFC2396_Parser.new
       url =
-        URI(URI.escape("http#{@config[:ssl] == true ? 's' : ''}://#{@config[:host]}/fmi/data/v1/databases/#{@config[:database]}/sessions/#{token}"))
+        URI(uri.escape("http#{@config[:ssl] == true ? 's' : ''}://#{@config[:host]}/fmi/data/v1/databases/#{@config[:database]}/sessions/#{token}"))
       ssl_verifyhost = @config[:local_network] ? 0 : 2
       ssl_verifypeer = !@config[:local_network]
 
