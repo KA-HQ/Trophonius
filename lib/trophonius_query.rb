@@ -222,12 +222,12 @@ module Trophonius
       end
 
       if @prerequest_script.present?
-        body.merge!(script: @prerequest_script)
+        body.merge!("script.prerequest" => @prerequest_script)
         body.merge!('script.prerequest.param' => @prerequest_scriptparam) if @prerequest_scriptparam.present?
       end
 
       if @presort_script.present?
-        body.merge!(script: @presort_script)
+        body.merge!("script.presort" => @presort_script)
         body.merge!('script.presort.param' => @presort_scriptparam) if @presort_scriptparam.present?
       end
 
