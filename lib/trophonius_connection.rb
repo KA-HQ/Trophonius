@@ -70,10 +70,13 @@ module Trophonius
           }
         )
       temp = request.run
-
+      body = temp.response_body
       begin
-        parsed = JSON.parse(temp.response_body)
+        parsed = JSON.parse()
       rescue Exception => e
+        puts e
+        puts e.backtrace
+        puts "body was: #{body}"
         Error.throw_error('1631')
       end
       Error.throw_error(parsed['messages'][0]['code']) if parsed['messages'][0]['code'] != '0'
