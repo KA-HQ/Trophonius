@@ -72,7 +72,7 @@ module Trophonius
       temp = request.run
       body = temp.response_body
       begin
-        parsed = JSON.parse()
+        parsed = JSON.parse(body)
       rescue Exception => e
         puts e
         puts e.backtrace
