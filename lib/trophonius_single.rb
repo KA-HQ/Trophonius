@@ -7,6 +7,7 @@ require 'trophonius_recordset'
 module Trophonius
   class Trophonius::Single
     attr_reader :query
+
     def initialize(config:)
       @config = config
       @query = {}
@@ -46,7 +47,7 @@ module Trophonius
       @query = {}
       close_connection(token)
 
-      return ret_val
+      ret_val
     end
 
     def first
@@ -79,7 +80,7 @@ module Trophonius
       end
       close_connection(token)
 
-      return ret_val
+      ret_val
     end
 
     def run_script(script:, scriptparameter:)
@@ -94,7 +95,7 @@ module Trophonius
         )
 
       token = setup_connection
-      result = make_request(url, "#{token}", 'get', '{}')
+      result = make_request(url, token.to_s, 'get', '{}')
       ret_val = ''
 
       if result['messages'][0]['code'] != '0'
@@ -109,7 +110,7 @@ module Trophonius
 
       close_connection(token)
 
-      return ret_val
+      ret_val
     end
 
     private
@@ -123,7 +124,7 @@ module Trophonius
       result['fieldData'].keys.each do |key|
         # unless key[/\s/] || key[/\W/]
         @translations.merge!(
-          { "#{ActiveSupport::Inflector.parameterize(ActiveSupport::Inflector.underscore(key.to_s), separator: '_').downcase}" => "#{key}" }
+          { ActiveSupport::Inflector.parameterize(ActiveSupport::Inflector.underscore(key.to_s), separator: '_').downcase.to_s => key.to_s }
         )
         hash.send(:define_singleton_method, ActiveSupport::Inflector.parameterize(ActiveSupport::Inflector.underscore(key.to_s), separator: '_')) do
           hash[key]
@@ -152,7 +153,7 @@ module Trophonius
             hash[key]
           end
         end
-        result['portalData'][key].each_with_index do |inner_hash|
+        result['portalData'][key].each do |inner_hash|
           inner_hash.keys.each do |inner_key|
             inner_method =
               ActiveSupport::Inflector.parameterize(ActiveSupport::Inflector.underscore(inner_key.gsub(/\w+::/, '').to_s), separator: '_')
@@ -164,7 +165,7 @@ module Trophonius
         end
         hash.merge!({ key => result['portalData'][key] })
       end
-      return hash
+      hash
     end
 
     def make_request(url_param, token, method, body, params = '')
@@ -220,7 +221,7 @@ module Trophonius
         Error.throw_error('1631')
       end
       Error.throw_error(parsed['messages'][0]['code']) if parsed['messages'][0]['code'] != '0'
-      return parsed['response']['token']
+      parsed['response']['token']
     end
 
     def close_connection(token)
@@ -247,7 +248,7 @@ module Trophonius
         Error.throw_error('1631')
       end
       Error.throw_error(parsed['messages'][0]['code']) if parsed['messages'][0]['code'] != '0'
-      return true
+      true
     end
   end
 end

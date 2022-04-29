@@ -42,40 +42,22 @@ module Trophonius
               )
             )
 
-          if model.translations.key?(relation[:foreign_key])
-            foreign_key_field = model.translations[relation[:foreign_key]].to_s
-          else
-            foreign_key_field = relation[:foreign_key].to_s
-          end
+          foreign_key_field = if model.translations.key?(relation[:foreign_key])
+                                model.translations[relation[:foreign_key]].to_s
+                              else
+                                relation[:foreign_key].to_s
+                              end
 
-          if pk_model.translations.key?(relation[:primary_key])
-            primary_key_field = pk_model.translations[relation[:primary_key]].to_s
-          else
-            primary_key_field = relation[:primary_key].to_s
-          end
+          primary_key_field = if pk_model.translations.key?(relation[:primary_key])
+                                pk_model.translations[relation[:primary_key]].to_s
+                              else
+                                relation[:primary_key].to_s
+                              end
 
           body = { query: [{ foreign_key_field => self[primary_key_field].to_s }], limit: 100_000 }.to_json
           response = Request.make_request(url, "Bearer #{Request.get_token}", 'post', body)
 
-          if response['messages'][0]['code'] != '0'
-            if response['messages'][0]['code'] == '101' || response['messages'][0]['code'] == '401'
-              resp = RecordSet.new(layout, model.non_modifiable_fields)
-              return resp
-            else
-              if response['messages'][0]['code'] == '102'
-                results = Request.retrieve_first(layout)
-                if results['messages'][0]['code'] != '0'
-                  Error.throw_error('102')
-                else
-                  r_results = results['response']['data']
-                  ret_val = r_results.empty? ? Error.throw_error('102') : r_results[0]['fieldData']
-                  query_keys = [foreign_key_field]
-                  Error.throw_error('102', (query_keys - ret_val.keys.map(&:downcase)).flatten.join(', '), layout)
-                end
-              end
-              Error.throw_error(response['messages'][0]['code'])
-            end
-          else
+          if response['messages'][0]['code'] == '0'
             r_results = response['response']['data']
             ret_val = RecordSet.new(layout, model.non_modifiable_fields)
             r_results.each do |r|
@@ -83,7 +65,23 @@ module Trophonius
               ret_val << hash
             end
             @response = ret_val
-            return @response
+            @response
+          elsif response['messages'][0]['code'] == '101' || response['messages'][0]['code'] == '401'
+            RecordSet.new(layout, model.non_modifiable_fields)
+
+          else
+            if response['messages'][0]['code'] == '102'
+              results = Request.retrieve_first(layout)
+              if results['messages'][0]['code'] == '0'
+                r_results = results['response']['data']
+                ret_val = r_results.empty? ? Error.throw_error('102') : r_results[0]['fieldData']
+                query_keys = [foreign_key_field]
+                Error.throw_error('102', (query_keys - ret_val.keys.map(&:downcase)).flatten.join(', '), layout)
+              else
+                Error.throw_error('102')
+              end
+            end
+            Error.throw_error(response['messages'][0]['code'])
           end
         end
       elsif ActiveSupport::Inflector.constantize(ActiveSupport::Inflector.classify(ActiveSupport::Inflector.singularize(method))).respond_to?('first')
@@ -105,40 +103,22 @@ module Trophonius
               )
             )
 
-          if fk_model.translations.key?(relation[:foreign_key])
-            foreign_key_field = fk_model.translations[relation[:foreign_key]].to_s
-          else
-            foreign_key_field = relation[:foreign_key].to_s
-          end
+          foreign_key_field = if fk_model.translations.key?(relation[:foreign_key])
+                                fk_model.translations[relation[:foreign_key]].to_s
+                              else
+                                relation[:foreign_key].to_s
+                              end
 
-          if pk_model.translations.key?(relation[:primary_key])
-            primary_key_field = pk_model.translations[relation[:primary_key]].to_s
-          else
-            primary_key_field = relation[:primary_key].to_s
-          end
+          primary_key_field = if pk_model.translations.key?(relation[:primary_key])
+                                pk_model.translations[relation[:primary_key]].to_s
+                              else
+                                relation[:primary_key].to_s
+                              end
 
           body = { query: [{ primary_key_field => self[foreign_key_field].to_s }], limit: 1 }.to_json
 
           response = Request.make_request(url, "Bearer #{Request.get_token}", 'post', body)
-          if response['messages'][0]['code'] != '0'
-            if response['messages'][0]['code'] == '101' || response['messages'][0]['code'] == '401'
-              resp = RecordSet.new(layout, pk_model.non_modifiable_fields)
-              return resp
-            else
-              if response['messages'][0]['code'] == '102'
-                results = Request.retrieve_first(layout)
-                if results['messages'][0]['code'] != '0'
-                  Error.throw_error('102')
-                else
-                  r_results = results['response']['data']
-                  ret_val = r_results.empty? ? Error.throw_error('102') : r_results[0]['fieldData']
-                  query_keys = [primary_key_field]
-                  Error.throw_error('102', (query_keys - ret_val.keys.map(&:downcase)).flatten.join(', '), layout)
-                end
-              end
-              Error.throw_error(response['messages'][0]['code'])
-            end
-          else
+          if response['messages'][0]['code'] == '0'
             r_results = response['response']['data']
             ret_val = RecordSet.new(layout, pk_model.non_modifiable_fields)
             r_results.each do |r|
@@ -146,7 +126,23 @@ module Trophonius
               ret_val << hash
             end
             @response = ret_val
-            return @response.first
+            @response.first
+          elsif response['messages'][0]['code'] == '101' || response['messages'][0]['code'] == '401'
+            RecordSet.new(layout, pk_model.non_modifiable_fields)
+
+          else
+            if response['messages'][0]['code'] == '102'
+              results = Request.retrieve_first(layout)
+              if results['messages'][0]['code'] == '0'
+                r_results = results['response']['data']
+                ret_val = r_results.empty? ? Error.throw_error('102') : r_results[0]['fieldData']
+                query_keys = [primary_key_field]
+                Error.throw_error('102', (query_keys - ret_val.keys.map(&:downcase)).flatten.join(', '), layout)
+              else
+                Error.throw_error('102')
+              end
+            end
+            Error.throw_error(response['messages'][0]['code'])
           end
         end
       else
@@ -187,7 +183,7 @@ module Trophonius
         Error.throw_error(403)
       else
         ret_val = result['response']['scriptResult']
-        return ret_val || true
+        ret_val || true
       end
     end
 
@@ -208,7 +204,7 @@ module Trophonius
         )
       body = "{\"fieldData\": #{modified_fields.to_json}}"
       response = Request.make_request(url, "Bearer #{Request.get_token}", 'patch', body)
-      response['messages'][0]['code'] != '0' ? Error.throw_error(response['messages'][0]['code']) : true
+      response['messages'][0]['code'] == '0' ? true : Error.throw_error(response['messages'][0]['code'])
     end
 
     ##
@@ -227,17 +223,17 @@ module Trophonius
           )
         )
       response = Request.make_request(url, "Bearer #{Request.get_token}", 'delete', '{}')
-      response['messages'][0]['code'] != '0' ? Error.throw_error(response['messages'][0]['code']) : true
+      response['messages'][0]['code'] == '0' ? true : Error.throw_error(response['messages'][0]['code'])
     end
 
     ##
     # Changes and saves the corresponding record in FileMaker
     # Throws a FileMaker error if save failed
     #
-    # @param [Hash] fieldData: Fields to be changed and data to fill the fields with
+    # @param [Hash] field_data: Fields to be changed and data to fill the fields with
     #
     # @return [True] if successful
-    def update(fieldData)
+    def update(field_data, portal_data: {})
       uri = URI::RFC2396_Parser.new
       url =
         URI(
@@ -247,23 +243,45 @@ module Trophonius
             }/layouts/#{layout_name}/records/#{record_id}"
           )
         )
-      fieldData.keys.each { |field| modifiable_fields[field] = fieldData[field] }
-      body = "{\"fieldData\": #{fieldData.to_json}}"
+      field_data.each_key { |field| modifiable_fields[field] = field_data[field] }
+      new_portal_data = {}
+      portal_data.each do |portal_name, portal_values|
+        new_portal_data.merge!(
+          portal_name =>
+            portal_values.map do |record|
+              record.each_with_object({}) do |(key, value), new_hash|
+                if key.to_s.downcase.include?('id') && key.to_s.downcase.include?('record')
+                  new_hash['recordId'] = value
+                else
+                  new_hash["#{portal_name}::#{key}"] = value
+                end
+              end
+            end
+        )
+      end
+      body =
+        if new_portal_data == {}
+          "{\"fieldData\": #{field_data.to_json} }"
+        else
+          "{\"fieldData\": #{field_data.to_json}, \"portalData\": #{new_portal_data.to_json}}"
+        end
+
       response = Request.make_request(url, "Bearer #{Request.get_token}", 'patch', body)
-      if response['messages'][0]['code'] != '0'
+      if response['messages'][0]['code'] == '0'
+        true
+      else
         if response['messages'][0]['code'] == '102'
           results = Request.retrieve_first(layout_name)
-          if results['messages'][0]['code'] != '0'
-            Error.throw_error('102')
-          else
+          if results['messages'][0]['code'] == '0'
             r_results = results['response']['data']
-            ret_val = r_results.empty? ? Error.throw_error('102') : r_results[0]['fieldData']
-            Error.throw_error('102', (fieldData.keys.map(&:downcase) - ret_val.keys.map(&:downcase)).flatten.join(', '), layout_name)
+            Error.throw_error('102') if r_results.empty?
+            ret_val = r_results[0]['fieldData']
+            Error.throw_error('102', (field_data.keys.map { |key| key.to_s.downcase } - ret_val.keys.map(&:downcase)).flatten.join(', '), layout_name)
+          else
+            Error.throw_error('102')
           end
         end
         Error.throw_error(response['messages'][0]['code'])
-      else
-        true
       end
     end
 
@@ -276,7 +294,7 @@ module Trophonius
     # @param [Tempfile or File] file: File to upload
     #
     # @return [True] if successful
-    def upload(container_name:, container_repetition: 1, file:)
+    def upload(container_name:, file:, container_repetition: 1)
       uri = URI::RFC2396_Parser.new
       url =
         URI(
@@ -288,7 +306,7 @@ module Trophonius
         )
 
       response = Request.upload_file_request(url, "Bearer #{Request.get_token}", file)
-      response['messages'][0]['code'] != '0' ? Error.throw_error(response['messages'][0]['code']) : true
+      response['messages'][0]['code'] == '0' ? true : Error.throw_error(response['messages'][0]['code'])
     end
   end
 end

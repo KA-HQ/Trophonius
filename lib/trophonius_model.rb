@@ -149,10 +149,10 @@ module Trophonius
     # @param [Hash] fieldData: the data to find
     #
     # @return [Trophonius::Model] new instance of the model
-    def self.where(fieldData)
+    def self.where(field_data)
       new_instance = Trophonius::Model.new(config: @configuration)
       new_instance.current_query = Trophonius::Query.new(trophonius_model: self, limit: @limit, offset: @offset)
-      new_instance.current_query.build_query[0].merge!(fieldData)
+      new_instance.current_query.build_query[0].merge!(field_data)
       new_instance
     end
 
@@ -163,8 +163,8 @@ module Trophonius
     # @param [Hash] fieldData: the data to find
     #
     # @return [Trophonius::Model] new instance of the model
-    def where(fieldData)
-      @current_query.build_query[0].merge!(fieldData)
+    def where(field_data)
+      @current_query.build_query[0].merge!(field_data)
       self
     end
 
@@ -175,7 +175,7 @@ module Trophonius
     #
     # @return [Record] the created record
     #   Model.create(fieldOne: "Data")
-    def self.create(fieldData, portalData: {})
+    def self.create(field_data, portalData: {})
       uri = URI::RFC2396_Parser.new
       url =
         URI(
@@ -187,11 +187,11 @@ module Trophonius
         )
       new_field_data = {}
       create_translations if @configuration.translations.keys.empty?
-      fieldData.keys.each do |k|
+      field_data.keys.each do |k|
         if @configuration.translations.keys.include?(k.to_s)
-          new_field_data.merge!({ "#{@configuration.translations[k.to_s]}" => fieldData[k] })
+          new_field_data.merge!({ "#{@configuration.translations[k.to_s]}" => field_data[k] })
         else
-          new_field_data.merge!({ "#{k}" => fieldData[k] })
+          new_field_data.merge!({ "#{k}" => field_data[k] })
         end
       end
 
@@ -249,7 +249,7 @@ module Trophonius
     #
     # @return [Record] a Record object that correspond to FileMaker record fitting the find request
     #   Model.find_by(fieldOne: "Data")
-    def self.find_by(fieldData)
+    def self.find_by(field_data)
       uri = URI::RFC2396_Parser.new
       url =
         URI(
@@ -261,11 +261,11 @@ module Trophonius
         )
       new_field_data = {}
       create_translations if @configuration.translations.keys.empty?
-      fieldData.keys.each do |k|
+      field_data.keys.each do |k|
         if @configuration.translations.keys.include?(k.to_s)
-          new_field_data.merge!({ "#{@configuration.translations[k.to_s]}" => fieldData[k] })
+          new_field_data.merge!({ "#{@configuration.translations[k.to_s]}" => field_data[k] })
         else
-          new_field_data.merge!({ "#{k}" => fieldData[k] })
+          new_field_data.merge!({ "#{k}" => field_data[k] })
         end
       end
       body = { query: [new_field_data], limit: '100000' }.to_json
@@ -345,7 +345,7 @@ module Trophonius
     # @param [Hash] fieldData: A hash containing the fields to edit and the new data to fill them with
     #
     # @return [Boolean] True if the delete was successful
-    def self.edit(record_id, fieldData)
+    def self.edit(record_id, field_data)
       uri = URI::RFC2396_Parser.new
       url =
         URI(
@@ -357,11 +357,11 @@ module Trophonius
         )
       new_field_data = {}
       create_translations if @configuration.translations.keys.empty?
-      fieldData.keys.each do |k|
+      field_data.keys.each do |k|
         if @configuration.translations.keys.include?(k.to_s)
-          new_field_data.merge!({ "#{@configuration.translations[k.to_s]}" => fieldData[k] })
+          new_field_data.merge!({ "#{@configuration.translations[k.to_s]}" => field_data[k] })
         else
-          new_field_data.merge!({ "#{k}" => fieldData[k] })
+          new_field_data.merge!({ "#{k}" => field_data[k] })
         end
       end
       body = "{\"fieldData\": #{new_field_data.to_json}}"
