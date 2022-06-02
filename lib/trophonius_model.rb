@@ -62,7 +62,7 @@ module Trophonius
     #
     # @return [Trophonius::Model] Self
     def self.paginate(page, limit)
-      @offset = ((page * limit - limit) + 1).to_s
+      @offset = (((page * limit) - limit) + 1).to_s
       @limit = limit.to_s
       self
     end
@@ -116,16 +116,16 @@ module Trophonius
         field_names = Trophonius::Request.get_layout_field_names(layout_name)
         field_names.each do |field|
           @configuration.translations.merge!(
-            { "#{ActiveSupport::Inflector.parameterize(ActiveSupport::Inflector.underscore(field.to_s), separator: '_').downcase}" => "#{field}" }
+            { ActiveSupport::Inflector.parameterize(ActiveSupport::Inflector.underscore(field.to_s), separator: '_').downcase.to_s => field.to_s }
           )
         end
       else
-        self.first
+        first
       end
       @configuration.translations
     end
 
-    def self.method_missing(method, *args, &block)
+    def self.method_missing(method, *args)
       new_instance = Trophonius::Model.new(config: @configuration)
       new_instance.current_query = Trophonius::Query.new(trophonius_model: self, limit: @limit, offset: @offset)
       args << new_instance
@@ -140,7 +140,7 @@ module Trophonius
         ret_val = @current_query.run_query(method, *args, &block)
         @limit = ''
         @offset = ''
-        return ret_val
+        ret_val
       end
     end
 
@@ -189,9 +189,9 @@ module Trophonius
       create_translations if @configuration.translations.keys.empty?
       field_data.keys.each do |k|
         if @configuration.translations.keys.include?(k.to_s)
-          new_field_data.merge!({ "#{@configuration.translations[k.to_s]}" => field_data[k] })
+          new_field_data.merge!({ @configuration.translations[k.to_s].to_s => field_data[k] })
         else
-          new_field_data.merge!({ "#{k}" => field_data[k] })
+          new_field_data.merge!({ k.to_s => field_data[k] })
         end
       end
 
@@ -200,34 +200,21 @@ module Trophonius
         new_portal_data.merge!(
           portal_name =>
             portal_values.map do |record|
-              record.inject({}) do |new_hash, (key, value)|
+              record.each_with_object({}) do |(key, value), new_hash|
                 new_hash["#{portal_name}::#{key}"] = value
-                new_hash
               end
             end
         )
       end
 
       body =
-        if new_portal_data != {}
-          "{\"fieldData\": #{new_field_data.to_json}, \"portalData\": #{new_portal_data.to_json}}"
-        else
+        if new_portal_data == {}
           "{\"fieldData\": #{new_field_data.to_json} }"
+        else
+          "{\"fieldData\": #{new_field_data.to_json}, \"portalData\": #{new_portal_data.to_json}}"
         end
       response = Request.make_request(url, "Bearer #{Request.get_token}", 'post', body)
-      if response['messages'][0]['code'] != '0'
-        if response['messages'][0]['code'] == '102'
-          results = Request.retrieve_first(layout_name)
-          if results['messages'][0]['code'] != '0'
-            Error.throw_error('102')
-          else
-            r_results = results['response']['data']
-            ret_val = r_results.empty? ? Error.throw_error('102') : r_results[0]['fieldData']
-            Error.throw_error('102', (new_field_data.keys.map(&:downcase) - ret_val.keys.map(&:downcase)).flatten.join(', '), layout_name)
-          end
-        end
-        Error.throw_error(response['messages'][0]['code'])
-      else
+      if response['messages'][0]['code'] == '0'
         url =
           URI(
             uri.escape(
@@ -238,7 +225,19 @@ module Trophonius
           )
         ret_val = build_result(Request.make_request(url, "Bearer #{Request.get_token}", 'get', '{}')['response']['data'][0])
         ret_val.send(:define_singleton_method, 'result_count') { 1 }
-        return ret_val
+        ret_val
+      else
+        if response['messages'][0]['code'] == '102'
+          results = Request.retrieve_first(layout_name)
+          if results['messages'][0]['code'] == '0'
+            r_results = results['response']['data']
+            ret_val = r_results.empty? ? Error.throw_error('102') : r_results[0]['fieldData']
+            Error.throw_error('102', (new_field_data.keys.map(&:downcase) - ret_val.keys.map(&:downcase)).flatten.join(', '), layout_name)
+          else
+            Error.throw_error('102')
+          end
+        end
+        Error.throw_error(response['messages'][0]['code'])
       end
     end
 
@@ -256,34 +255,35 @@ module Trophonius
           uri.escape(
             "http#{Trophonius.config.ssl == true ? 's' : ''}://#{Trophonius.config.host}/fmi/data/v1/databases/#{
               Trophonius.config.database
-            }/layouts/#{self.layout_name}/_find?_limit=1"
+            }/layouts/#{layout_name}/_find?_limit=1"
           )
         )
       new_field_data = {}
       create_translations if @configuration.translations.keys.empty?
       field_data.keys.each do |k|
         if @configuration.translations.keys.include?(k.to_s)
-          new_field_data.merge!({ "#{@configuration.translations[k.to_s]}" => field_data[k] })
+          new_field_data.merge!({ @configuration.translations[k.to_s].to_s => field_data[k] })
         else
-          new_field_data.merge!({ "#{k}" => field_data[k] })
+          new_field_data.merge!({ k.to_s => field_data[k] })
         end
       end
       body = { query: [new_field_data], limit: '100000' }.to_json
       response = Request.make_request(url, "Bearer #{Request.get_token}", 'post', body)
 
-      if response['messages'][0]['code'] != '0'
-        if response['messages'][0]['code'] == '101' || response['messages'][0]['code'] == '401'
-          return RecordSet.new(self.layout_name, self.non_modifiable_fields)
-        end
-        Error.throw_error(response['messages'][0]['code'])
-      else
+      if response['messages'][0]['code'] == '0'
         r_results = response['response']['data']
-        ret_val = RecordSet.new(self.layout_name, self.non_modifiable_fields)
+        ret_val = RecordSet.new(layout_name, non_modifiable_fields)
         r_results.each do |r|
           hash = build_result(r)
           ret_val << hash
         end
-        return ret_val.first
+        ret_val.first
+      else
+        if response['messages'][0]['code'] == '101' || response['messages'][0]['code'] == '401'
+          return RecordSet.new(layout_name, non_modifiable_fields)
+        end
+
+        Error.throw_error(response['messages'][0]['code'])
       end
     end
 
@@ -304,12 +304,12 @@ module Trophonius
           )
         )
       response = Request.make_request(url, "Bearer #{Request.get_token}", 'get', '{}')
-      if response['messages'][0]['code'] != '0'
-        Error.throw_error(response['messages'][0]['code'], record_id)
-      else
+      if response['messages'][0]['code'] == '0'
         ret_val = build_result(response['response']['data'][0])
         ret_val.send(:define_singleton_method, 'result_count') { 1 }
-        return ret_val
+        ret_val
+      else
+        Error.throw_error(response['messages'][0]['code'], record_id)
       end
     end
 
@@ -330,10 +330,10 @@ module Trophonius
           )
         )
       response = Request.make_request(url, "Bearer #{Request.get_token}", 'delete', '{}')
-      if response['messages'][0]['code'] != '0'
-        Error.throw_error(response['messages'][0]['code'])
+      if response['messages'][0]['code'] == '0'
+        true
       else
-        return true
+        Error.throw_error(response['messages'][0]['code'])
       end
     end
 
@@ -359,14 +359,14 @@ module Trophonius
       create_translations if @configuration.translations.keys.empty?
       field_data.keys.each do |k|
         if @configuration.translations.keys.include?(k.to_s)
-          new_field_data.merge!({ "#{@configuration.translations[k.to_s]}" => field_data[k] })
+          new_field_data.merge!({ @configuration.translations[k.to_s].to_s => field_data[k] })
         else
-          new_field_data.merge!({ "#{k}" => field_data[k] })
+          new_field_data.merge!({ k.to_s => field_data[k] })
         end
       end
       body = "{\"fieldData\": #{new_field_data.to_json}}"
       response = Request.make_request(url, "Bearer #{Request.get_token}", 'patch', body)
-      response['messages'][0]['code'] != '0' ? Error.throw_error(response['messages'][0]['code']) : true
+      response['messages'][0]['code'] == '0' ? true : Error.throw_error(response['messages'][0]['code'])
     end
 
     ##
@@ -376,7 +376,7 @@ module Trophonius
     #
     # @return [Record] A Record with singleton_methods for the fields where possible
     def self.build_result(result)
-      hash = Trophonius::Record.new
+      hash = Trophonius::Record.new(name)
       hash.record_id = result['recordId']
       hash.layout_name = layout_name
       hash.model_name = name
@@ -384,7 +384,7 @@ module Trophonius
       result['fieldData'].keys.each do |key|
         # unless key[/\s/] || key[/\W/]
         @configuration.translations.merge!(
-          { "#{ActiveSupport::Inflector.parameterize(ActiveSupport::Inflector.underscore(key.to_s), separator: '_').downcase}" => "#{key}" }
+          { ActiveSupport::Inflector.parameterize(ActiveSupport::Inflector.underscore(key.to_s), separator: '_').downcase.to_s => key.to_s }
         )
         hash.send(:define_singleton_method, ActiveSupport::Inflector.parameterize(ActiveSupport::Inflector.underscore(key.to_s), separator: '_')) do
           hash[key]
@@ -413,7 +413,7 @@ module Trophonius
             hash[key]
           end
         end
-        result['portalData'][key].each_with_index do |inner_hash|
+        result['portalData'][key].each do |inner_hash|
           inner_hash.keys.each do |inner_key|
             inner_method =
               ActiveSupport::Inflector.parameterize(ActiveSupport::Inflector.underscore(inner_key.gsub(/\w+::/, '').to_s), separator: '_')
@@ -425,7 +425,7 @@ module Trophonius
         end
         hash.merge!({ key => result['portalData'][key] })
       end
-      return hash
+      hash
     end
 
     ##
@@ -434,13 +434,13 @@ module Trophonius
     # @return [Record]: a Record corresponding to the FileMaker record.
     def self.first
       results = Request.retrieve_first(layout_name)
-      if results['messages'][0]['code'] != '0'
-        Error.throw_error(results['messages'][0]['code'])
-      else
+      if results['messages'][0]['code'] == '0'
         r_results = results['response']['data']
         ret_val = r_results.empty? ? Trophonius::Record.new : build_result(r_results[0])
         ret_val.send(:define_singleton_method, 'result_count') { r_results.empty? ? 0 : 1 }
-        return ret_val
+        ret_val
+      else
+        Error.throw_error(results['messages'][0]['code'])
       end
     end
 
@@ -459,8 +459,8 @@ module Trophonius
       elsif result['response']['scriptResult'] == '403'
         Error.throw_error(403)
       else
-        ret_val = result['response']['scriptResult']
-        return ret_val
+        result['response']['scriptResult']
+
       end
     end
 
@@ -474,39 +474,37 @@ module Trophonius
       uri = URI::RFC2396_Parser.new
       results = Request.retrieve_all(layout_name, sort)
       count = results['response']['scriptResult'].to_i
-      unless @limit.empty? || @offset.empty?
-        url =
-          URI(
-            uri.escape(
-              "http#{Trophonius.config.ssl == true ? 's' : ''}://#{Trophonius.config.host}/fmi/data/v1/databases/#{
-                Trophonius.config.database
-              }/layouts/#{layout_name}/records?_offset=#{@offset}&_limit=#{@limit}"
-            )
-          )
-      else
-        url =
-          URI(
-            uri.escape(
-              "http#{Trophonius.config.ssl == true ? 's' : ''}://#{Trophonius.config.host}/fmi/data/v1/databases/#{
+      url = if @limit.empty? || @offset.empty?
+              URI(
+                uri.escape(
+                  "http#{Trophonius.config.ssl == true ? 's' : ''}://#{Trophonius.config.host}/fmi/data/v1/databases/#{
                 Trophonius.config.database
               }/layouts/#{layout_name}/records?_limit=#{count == 0 ? 1_000_000 : count}"
-            )
-          )
-      end
+                )
+              )
+            else
+              URI(
+                uri.escape(
+                  "http#{Trophonius.config.ssl == true ? 's' : ''}://#{Trophonius.config.host}/fmi/data/v1/databases/#{
+                Trophonius.config.database
+              }/layouts/#{layout_name}/records?_offset=#{@offset}&_limit=#{@limit}"
+                )
+              )
+            end
       @limit = ''
       @offset = ''
       results = Request.make_request(url, "Bearer #{Request.get_token}", 'get', '{}')
-      if results['messages'][0]['code'] != '0'
-        Error.throw_error(results['messages'][0]['code'])
-      else
+      if results['messages'][0]['code'] == '0'
         r_results = results['response']['data']
-        ret_val = RecordSet.new(self.layout_name, self.non_modifiable_fields)
+        ret_val = RecordSet.new(layout_name, non_modifiable_fields)
         r_results.each do |r|
           hash = build_result(r)
           ret_val << hash
         end
         ret_val.result_count = count
-        return ret_val
+        ret_val
+      else
+        Error.throw_error(results['messages'][0]['code'])
       end
     end
   end

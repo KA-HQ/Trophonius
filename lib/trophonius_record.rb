@@ -12,9 +12,10 @@ module Trophonius
 
     ##
     # Initializes a new Record
-    def initialize
+    def initialize(model = '')
       @modifiable_fields = {}
       @modified_fields = {}
+      model_name = model
       @model = ActiveSupport::Inflector.constantize(ActiveSupport::Inflector.classify(ActiveSupport::Inflector.singularize(model_name)))
 
       super
