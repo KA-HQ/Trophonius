@@ -13,8 +13,8 @@ module Trophonius
       if Trophonius.config.redis_connection
         Trophonius::RedisManager.set_key(key: 'token', value: setup_connection)
         Trophonius::RedisManager.set_key(key: 'last_connection', value: Time.now)
-        token = Trophonius::RedisManager.get_key(key: 'token')
-        token
+        Trophonius::RedisManager.get_key(key: 'token')
+
       else
         @token = setup_connection
         @last_connection = Time.now
@@ -73,19 +73,18 @@ module Trophonius
       body = temp.response_body
       headers = temp.headers
       code = temp.code
-      
+
+      puts "RESPONSE FROM FILEMAKER (CONNECT) WAS #{body}"
+
       begin
         parsed = JSON.parse(body)
       rescue Exception => e
         puts e
         puts e.backtrace
-        puts "body was: #{body}"
-        puts "headers were: #{headers}"
-        puts "code was: #{code}"
         Error.throw_error('1631')
       end
       Error.throw_error(parsed['messages'][0]['code']) if parsed['messages'][0]['code'] != '0'
-      return parsed['response']['token']
+      parsed['response']['token']
     end
 
     ##
@@ -124,14 +123,14 @@ module Trophonius
       Trophonius::RedisManager.disconnect! if Trophonius.config.redis_connection
       @token = nil
       @last_connection = nil
-      return true
+      true
     end
 
     ##
     # Returns the last received token
     # @return [String] the last valid *token* used to connect with the FileMaker data api
     def self.token
-      return Trophonius.config.redis_connection ? Trophonius::RedisManager.get_key(key: 'token') : @token
+      Trophonius.config.redis_connection ? Trophonius::RedisManager.get_key(key: 'token') : @token
     end
 
     ##
@@ -165,7 +164,7 @@ module Trophonius
         temp = request.run
         JSON.parse(temp.response_body)['messages'][0]['code'] == '0'
       rescue StandardError
-        return false
+        false
       end
     end
 
