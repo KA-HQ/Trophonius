@@ -139,7 +139,18 @@ module Trophonius
     # @return [JSON] The first 10000000 records from FileMaker
     def self.retrieve_all(layout_name, sort)
       uri = URI::RFC2396_Parser.new
-      if !sort.empty?
+      if sort.empty?
+        url =
+          URI(
+            uri.escape(
+              "http#{Trophonius.config.ssl == true ? 's' : ''}://#{Trophonius.config.host}/fmi/data/v1/databases/#{
+                Trophonius.config.database
+              }/layouts/#{layout_name}/records?_limit=10000000#{
+                Trophonius.config.count_result_script == '' ? '' : "&script=#{Trophonius.config.count_result_script}"
+              }"
+            )
+          )
+      else
         sort_order = sort.to_json.to_s
         url =
           URI(
@@ -147,17 +158,6 @@ module Trophonius
               "http#{Trophonius.config.ssl == true ? 's' : ''}://#{Trophonius.config.host}/fmi/data/v1/databases/#{
                 Trophonius.config.database
               }/layouts/#{layout_name}/records?_limit=10000000_sort=#{sort_order}#{
-                Trophonius.config.count_result_script == '' ? '' : "&script=#{Trophonius.config.count_result_script}"
-              }"
-            )
-          )
-      else
-        url =
-          URI(
-            uri.escape(
-              "http#{Trophonius.config.ssl == true ? 's' : ''}://#{Trophonius.config.host}/fmi/data/v1/databases/#{
-                Trophonius.config.database
-              }/layouts/#{layout_name}/records?_limit=10000000#{
                 Trophonius.config.count_result_script == '' ? '' : "&script=#{Trophonius.config.count_result_script}"
               }"
             )

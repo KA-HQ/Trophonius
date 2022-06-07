@@ -9,6 +9,7 @@ module Trophonius
     class LayoutUnexistingError < NoMethodError; end # :nodoc:
     class InvalidTokenError < StandardError; end # :nodoc:
     class UnauthenticatedError < StandardError; end # :nodoc:
+    class AuthenticationError < StandardError; end # :nodoc:
     class FieldNotModifiableError < StandardError; end # :nodoc:
     class ResponseNotYetImplementedError < StandardError; end # :nodoc:
     class UnknownFileMakerError < StandardError; end # :nodoc:
@@ -25,8 +26,12 @@ module Trophonius
     class ValueOutOfRangeError < ValidationError; end # :nodoc:
     class ValueNotUniqueError < ValidationError; end # :nodoc:
     class ValueNotExistingError < ValidationError; end # :nodoc:
+    class ValueListNotExistingError < ValidationError; end # :nodoc:
     class ValueNotInValuelistError < ValidationError; end # :nodoc:
     class ValueFailedCalculationError < ValidationError; end # :nodoc:
+    class RecordLockedError < ValidationError; end # :nodoc:
+    class EntityLockedError < ValidationError; end # :nodoc:
+    class MissingEntityError < ValidationError; end # :nodoc:
 
     ##
     # Throws an error corresponding to the error number
@@ -55,38 +60,52 @@ module Trophonius
         raise RecordNotFoundError.new, 'Empty result'
       when '9'
         raise UnauthenticatedError.new, 'User has insufficient privileges'
-        # when "10"
-        # when "11"
-        # when "12"
-        # when "13"
-        # when "14"
-        # when "15"
-        # when "16"
-        # when "17"
-        # when "16"
-        # when "18"
-        # when "19"
-        # when "09"
-        # when "20"
-        # when "21"
-        # when "100"
+      when '10'
+        raise MissingEntityError.new, 'Requested data is missing'
+      when '11'
+        raise ValidationError.new, 'Name is not valid'
+      when '12'
+        raise ValidationError.new, 'Name already exists'
+      when '13'
+        raise EntityLockedError.new, 'File or object is in use'
+      when '14'
+        raise ValueOutOfRangeError.new, 'Out of range'
+      when '15'
+        raise NumberValueError.new, 'Cant divide by zero'
+      when '16'
+        raise CommandError.new, 'Operation failed; request retry (for example, a user query)'
+      when '17'
+        raise ValidationError.new, 'Attempt to convert foreign character set to UTF-16 failed'
+      when '18'
+        raise AuthenticationError.new, 'Client must provide account information to proceed'
+      when '19'
+        raise ValidationError.new, 'String contains characters other than A-Z, a-z, 0-9 (ASCII)'
+      when '20'
+        raise CommandError.new, 'Command/operation canceled by triggered script'
+      when '21'
+        raise CommandError.new, 'Request not supported (for example, when creating a hard link on a file system that does not support hard links)'
+      when '100'
+        raise MissingEntityError.new, 'File is missing'
       when '101'
         raise RecordNotFoundError.new, "Record #{more_info} was not found"
       when '102'
-        if more_info != 0
-          raise FieldUnexistingError.new, "Following field(s) #{more_info} do not exist on layout #{layout_info}"
-        else
-          raise FieldUnexistingError.new, 'Field does not exist'
-        end
-        # when "103"
+        raise FieldUnexistingError.new, 'Field does not exist' if more_info.zero?
+
+        raise FieldUnexistingError.new, "Following field(s) #{more_info} do not exist on layout #{layout_info}"
+      when '103'
+        raise MissingEntityError.new, 'Relationship is missing'
       when '104'
         raise ScriptUnexistingError.new, 'Script does not exist'
       when '105'
         raise LayoutUnexistingError.new, 'Layout does not exist'
-        # when "106"
-        # when "107"
-        # when "108"
-        # when "109"
+      when '106'
+        raise MissingEntityError.new, 'Table is missing'
+      when '107'
+        raise MissingEntityError.new, 'Index is missing'
+      when '108'
+        raise ValueListNotExistingError.new, 'ValueList does not exist'
+      when '109'
+        raise MissingEntityError.new, 'Privilege set is missing'
         # when "110"
         # when "111"
         # when "112"
@@ -119,7 +138,8 @@ module Trophonius
         # when "217"
         # when "218"
         # when "300"
-        # when "301"
+      when '301'
+        raise RecordLockedError.new, 'Record is locked by a FileMaker client'
         # when "302"
         # when "303"
         # when "304"
