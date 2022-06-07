@@ -2,7 +2,7 @@
 
 Gem::Specification.new do |s|
   s.name = 'trophonius'
-  s.version = '1.4.4.3'
+  s.version = '1.4.4.4'
   s.authors = 'Kempen Automatisering'
   s.homepage = 'https://github.com/Willem-Jan/Trophonius'
   s.summary = 'Link between Ruby (on Rails) and FileMaker.'
