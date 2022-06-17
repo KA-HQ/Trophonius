@@ -157,7 +157,7 @@ module Trophonius
             uri.escape(
               "http#{Trophonius.config.ssl == true ? 's' : ''}://#{Trophonius.config.host}/fmi/data/v1/databases/#{
                 Trophonius.config.database
-              }/layouts/#{layout_name}/records?_limit=10000000_sort=#{sort_order}#{
+              }/layouts/#{layout_name}/records?_limit=10000000&_sort=#{sort_order}#{
                 Trophonius.config.count_result_script == '' ? '' : "&script=#{Trophonius.config.count_result_script}"
               }"
             )
