@@ -272,7 +272,6 @@ module Trophonius
 
       puts "BODY SENT TO FILEMAKER WAS: #{body}"
       response = Request.make_request(url, "Bearer #{Request.get_token}", 'patch', body)
-      puts "RESPONSE FROM FILEMAKER WAS: #{response}"
       if response['messages'][0]['code'] == '0'
         true
       else

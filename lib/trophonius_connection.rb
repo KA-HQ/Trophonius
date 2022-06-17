@@ -74,8 +74,6 @@ module Trophonius
       headers = temp.headers
       code = temp.code
 
-      puts "RESPONSE FROM FILEMAKER (CONNECT) WAS #{body}"
-
       begin
         parsed = JSON.parse(body)
       rescue Exception => e
