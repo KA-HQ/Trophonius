@@ -73,6 +73,7 @@ module Trophonius
       body = temp.response_body
       headers = temp.headers
       code = temp.code
+      puts temp
       puts body
       puts headers
       puts code
