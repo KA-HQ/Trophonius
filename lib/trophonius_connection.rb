@@ -67,13 +67,14 @@ module Trophonius
           headers: {
             'Content-Type' => 'application/json',
             Authorization: "Basic #{Base64.strict_encode64("#{Trophonius.config.username}:#{Trophonius.config.password}")}"
-          }
+          },
+          verbose: true
         )
       temp = request.run
       body = temp.response_body
       headers = temp.headers
       code = temp.code
-      puts temp
+      puts temp.inspect
       puts body
       puts headers
       puts code
