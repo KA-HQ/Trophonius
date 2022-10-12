@@ -73,7 +73,9 @@ module Trophonius
       body = temp.response_body
       headers = temp.headers
       code = temp.code
-
+      puts body
+      puts headers
+      puts code
       begin
         parsed = JSON.parse(body)
       rescue Exception => e
