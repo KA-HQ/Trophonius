@@ -37,6 +37,8 @@ module Trophonius
       begin
         JSON.parse(temp.response_body)
       rescue Exception => e
+        puts e
+        puts e.backtrace
         Error.throw_error('1631')
       end
     end
@@ -111,7 +113,9 @@ module Trophonius
         )
       begin
         make_request(url, "Bearer #{get_token}", 'get', '{}')['response']['fieldMetaData'].map { |field| field['name'] }
-      rescue Exception
+      rescue StandardError => e
+        puts e
+        puts e.backtrace
         Error.throw_error('1631')
       end
     end
