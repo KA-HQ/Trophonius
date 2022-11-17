@@ -173,7 +173,7 @@ module Trophonius
       if Trophonius.config.layout_name != '' && test_connection == false
         false
       else
-        last_connection.nil? ? false : (((Time.now - last_connection) / 60).round <= 15 || test_connection)
+        last_connection.nil? ? false : test_connection
       end
     end
   end
