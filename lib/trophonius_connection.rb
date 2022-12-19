@@ -160,7 +160,7 @@ module Trophonius
           )
         temp = request.run
         json_parsed = JSON.parse(temp.response_body)
-        puts json_parsed
+
         json_parsed['messages'][0]['code'] == '0'
       rescue StandardError => e
         puts e
