@@ -160,8 +160,12 @@ module Trophonius
             method: :get, body: {}, params: {}, headers: { 'Content-Type' => 'application/json', Authorization: "Bearer #{@token}" }
           )
         temp = request.run
-        JSON.parse(temp.response_body)['messages'][0]['code'] == '0'
-      rescue StandardError
+        json_parsed = JSON.parse(temp.response_body)
+        puts json_parsed
+        json_parsed['messages'][0]['code'] == '0'
+      rescue StandardError => e
+        puts e
+        puts e.backtrace
         false
       end
     end
