@@ -14,7 +14,6 @@ module Trophonius
         Trophonius::RedisManager.set_key(key: 'token', value: setup_connection)
         Trophonius::RedisManager.set_key(key: 'last_connection', value: Time.now)
         Trophonius::RedisManager.get_key(key: 'token')
-
       else
         @token = setup_connection
         @last_connection = Time.now
@@ -157,7 +156,7 @@ module Trophonius
         request =
           Typhoeus::Request.new(
             url,
-            method: :get, body: {}, params: {}, headers: { 'Content-Type' => 'application/json', Authorization: "Bearer #{@token}" }
+            method: :get, body: {}, params: {}, headers: { 'Content-Type' => 'application/json', Authorization: "Bearer #{token}" }
           )
         temp = request.run
         json_parsed = JSON.parse(temp.response_body)
