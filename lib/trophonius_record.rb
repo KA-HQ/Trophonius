@@ -16,8 +16,9 @@ module Trophonius
       @modifiable_fields = {}
       @modified_fields = {}
       model_name = model
-      @model = ActiveSupport::Inflector.constantize(ActiveSupport::Inflector.classify(ActiveSupport::Inflector.singularize(model_name)))
-
+      if model_name.present?
+        @model = ActiveSupport::Inflector.constantize(ActiveSupport::Inflector.classify(ActiveSupport::Inflector.singularize(model_name)))
+      end
       super
     end
 
