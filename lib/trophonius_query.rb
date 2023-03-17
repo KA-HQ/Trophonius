@@ -234,6 +234,7 @@ module Trophonius
       if @portal_limits
         portal_hash = { portal: @portal_limits.map { |portal_name, limit| "#{portal_name}" } }
         body.merge!(portal_hash)
+        puts body
         @portal_limits.each { |portal_name, limit| body.merge!({ "limit.#{portal_name}" => limit.to_s }) }
       end
 
