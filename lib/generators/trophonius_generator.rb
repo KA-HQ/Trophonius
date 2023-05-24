@@ -22,6 +22,7 @@ module Trophonius
   config.password = Rails.application.credentials.dig(:password) # (requires >= Rails 5.2) otherwise use old secrets
   config.redis_connection = false # default false, true if you want to store the token in redis
   config.ssl = true # or false depending on whether https or http should be used
+  config.fm_18 = true
   # USE THE NEXT OPTION WITH CAUTION
   config.local_network = false # if true the ssl certificate will not be verified to allow for self-signed certificates
 end"

@@ -22,7 +22,7 @@ Install the gem yourself
 Or add to your gemfile
 
 ```ruby
- gem 'trophonius', '>= 1.0.0'
+ gem 'trophonius', '~> 1.4'
 ```
 
 And run bundle install
@@ -50,6 +50,7 @@ Trophonius.configure do |config|
   config.count_result_script = "script that can be used to count the results (optional)"
   config.redis_connection = true # default false, true if you want to store the token in redis
   config.ssl = true # or false depending on whether https or http should be used
+  config.fm_18 = true # use if FileMaker server version >= 18, default true
   # USE THE NEXT OPTION WITH CAUTION
   config.local_network = true # if true the ssl certificate will not be verified to allow for self-signed certificates
 end
