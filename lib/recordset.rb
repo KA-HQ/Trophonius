@@ -5,7 +5,7 @@ require 'connectors/connection'
 
 module Trophonius
   # A RecordSet contains all records, as Record, retrieved from the FileMaker database
-  class Trophonius::RecordSet < Array
+  class RecordSet < Array
     attr_accessor :result_count, :layout_name, :non_modifiable_fields, :records
 
     class EmptyParameterError < ArgumentError; end # :nodoc:

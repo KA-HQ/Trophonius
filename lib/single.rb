@@ -5,7 +5,7 @@ require 'record'
 require 'recordset'
 
 module Trophonius
-  class Trophonius::Single
+  class Single
     attr_reader :query
 
     def initialize(config:)

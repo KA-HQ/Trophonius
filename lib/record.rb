@@ -9,7 +9,7 @@ module Trophonius
   # This class will hold a singular record
   #
   # A Record is contained in a RecordSet and has methods to retrieve data from the fields inside the Record-hash
-  class Trophonius::Record < Hash
+  class Record < Hash
     include Trophonius::Translator
     attr_accessor :record_id, :model_name, :layout_name, :modifiable_fields, :modified_fields
 

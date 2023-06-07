@@ -2,7 +2,7 @@ require 'json'
 require 'config'
 
 module Trophonius
-  module Trophonius::Error
+  module Error
     class RecordNotFoundError < StandardError; end # :nodoc:
     class FieldUnexistingError < NoMethodError; end # :nodoc:
     class ScriptUnexistingError < NoMethodError; end # :nodoc:

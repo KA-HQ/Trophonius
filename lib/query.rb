@@ -5,7 +5,7 @@ require 'recordset'
 require 'error'
 
 module Trophonius
-  class Trophonius::Query
+  class Query
     attr_reader :response
     attr_accessor :presort_script, :presort_scriptparam, :prerequest_script, :prerequest_scriptparam, :post_request_script, :post_request_scriptparam
 
@@ -184,20 +184,12 @@ module Trophonius
     #
     # @return Response of the called method
     def run_query(method, *args, &block)
-      uri = URI::RFC2396_Parser.new
-      url =
-        URI(
-          uri.escape(
-            "http#{Trophonius.config.ssl == true ? 's' : ''}://#{Trophonius.config.host}/fmi/data/v1/databases/#{
-              Trophonius.config.database
-            }/layouts/#{@trophonius_model.layout_name}/_find"
-          )
-        )
+      url = "/layouts/#{@trophonius_model.layout_name}/_find"
       new_field_data = @current_query.map { |_q| {} }
 
       @trophonius_model.create_translations if @trophonius_model.translations.keys.empty?
       @current_query.each_with_index do |query, index|
-        query.keys.each do |k|
+        query.each_key do |k|
           if @trophonius_model.translations.key?(k.to_s)
             new_field_data[index].merge!(@trophonius_model.translations[k.to_s].to_s => query[k].to_s)
           else
@@ -229,14 +221,13 @@ module Trophonius
       end
 
       if @portal_limits
-        portal_hash = { portal: @portal_limits.map { |portal_name, _limit| "#{portal_name}" } }
+        portal_hash = { portal: @portal_limits.map { |portal_name, _limit| portal_name } }
         body.merge!(portal_hash)
         @portal_limits.each { |portal_name, limit| body.merge!({ "limit.#{portal_name}" => limit.to_s }) }
-        puts body
       end
 
       body = body.to_json
-      response = DatabaseRequest.make_request(url, "Bearer #{DatabaseRequest.token}", 'post', body)
+      response = DatabaseRequest.make_request(url, 'post', body)
 
       if response['messages'][0]['code'] == '0'
         r_results = response['response']['data']
