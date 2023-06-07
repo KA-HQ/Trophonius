@@ -1,8 +1,8 @@
-require 'trophonius_date'
-require 'trophonius_time'
-require 'trophonius_error'
-require 'trophonius_record'
-require 'trophonius_recordset'
+require 'date'
+require 'time'
+require 'error'
+require 'record'
+require 'recordset'
 
 module Trophonius
   class Trophonius::Single
@@ -116,56 +116,9 @@ module Trophonius
     private
 
     def build_result(result)
-      hash = Trophonius::Record.new
-      hash.record_id = result['recordId']
-      hash.layout_name = @config[:layout_name]
-      hash.model_name = 'Single'
-
-      result['fieldData'].keys.each do |key|
-        # unless key[/\s/] || key[/\W/]
-        @translations.merge!(
-          { ActiveSupport::Inflector.parameterize(ActiveSupport::Inflector.underscore(key.to_s), separator: '_').downcase.to_s => key.to_s }
-        )
-        hash.send(:define_singleton_method, ActiveSupport::Inflector.parameterize(ActiveSupport::Inflector.underscore(key.to_s), separator: '_')) do
-          hash[key]
-        end
-        unless @config[:non_modifiable_fields]&.include?(key)
-          @all_fields.merge!(
-            ActiveSupport::Inflector.parameterize(ActiveSupport::Inflector.underscore(key.to_s), separator: '_').downcase =>
-              ActiveSupport::Inflector.parameterize(ActiveSupport::Inflector.underscore(key.to_s), separator: '_')
-          )
-          hash.send(
-            :define_singleton_method,
-            "#{ActiveSupport::Inflector.parameterize(ActiveSupport::Inflector.underscore(key.to_s), separator: '_')}="
-          ) do |new_val|
-            hash[key] = new_val
-            hash.modifiable_fields[key] = new_val
-            hash.modified_fields[key] = new_val
-          end
-        end
-        # end
-        hash.merge!({ key => result['fieldData'][key] })
-        hash.modifiable_fields.merge!({ key => result['fieldData'][key] }) unless @config[:non_modifiable_fields]&.include?(key)
-      end
-      result['portalData'].keys.each do |key|
-        unless key[/\s/] || key[/\W/]
-          hash.send(:define_singleton_method, ActiveSupport::Inflector.parameterize(ActiveSupport::Inflector.underscore(key.to_s), separator: '_')) do
-            hash[key]
-          end
-        end
-        result['portalData'][key].each do |inner_hash|
-          inner_hash.keys.each do |inner_key|
-            inner_method =
-              ActiveSupport::Inflector.parameterize(ActiveSupport::Inflector.underscore(inner_key.gsub(/\w+::/, '').to_s), separator: '_')
-            unless inner_method[/\s/] || inner_method[/\W/]
-              inner_hash.send(:define_singleton_method, inner_method.to_s) { inner_hash[inner_key] }
-              inner_hash.send(:define_singleton_method, 'record_id') { inner_hash['recordId'] }
-            end
-          end
-        end
-        hash.merge!({ key => result['portalData'][key] })
-      end
-      hash
+      hash = Trophonius::Record.new(result, 'Single')
+      record.layout_name = @config[:layout_name]
+      record
     end
 
     def make_request(url_param, token, method, body, params = '')
@@ -184,7 +137,8 @@ module Trophonius
       temp = request.run
       begin
         JSON.parse(temp.response_body)
-      rescue Exception => e
+      rescue StandardError => e
+        puts e
         close_connection(token)
         Error.throw_error('1631')
       end
@@ -217,7 +171,8 @@ module Trophonius
       temp = request.run
       begin
         parsed = JSON.parse(temp.response_body)
-      rescue Exception => e
+      rescue StandardError => e
+        puts e
         Error.throw_error('1631')
       end
       Error.throw_error(parsed['messages'][0]['code']) if parsed['messages'][0]['code'] != '0'
@@ -244,7 +199,8 @@ module Trophonius
 
       begin
         parsed = JSON.parse(temp.response_body)
-      rescue Exception => e
+      rescue StandardError => e
+        puts e
         Error.throw_error('1631')
       end
       Error.throw_error(parsed['messages'][0]['code']) if parsed['messages'][0]['code'] != '0'

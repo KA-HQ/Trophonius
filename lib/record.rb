@@ -1,29 +1,34 @@
 # frozen_string_literal: true
 
+require 'active_support/inflector'
 require 'json'
-require 'trophonius_config'
+require 'config'
+require 'translator'
 
 module Trophonius
   # This class will hold a singular record
   #
   # A Record is contained in a RecordSet and has methods to retrieve data from the fields inside the Record-hash
   class Trophonius::Record < Hash
+    include Trophonius::Translator
     attr_accessor :record_id, :model_name, :layout_name, :modifiable_fields, :modified_fields
 
     ##
     # Initializes a new Record
-    def initialize(model = '')
+    def initialize(fm_record = {}, model = '')
       @modifiable_fields = {}
       @modified_fields = {}
-      model_name = model
-      if model_name.present?
-        @model = ActiveSupport::Inflector.constantize(ActiveSupport::Inflector.classify(ActiveSupport::Inflector.singularize(model_name)))
-      end
+      @model_name = model
+      @model = ActiveSupport::Inflector.constantize(ActiveSupport::Inflector.classify(ActiveSupport::Inflector.singularize(model_name)))
+      @layout_name = @model.layout_name
+      define_field_methods(fm_record)
+      define_portal_methods(fm_record)
       super
     end
 
     def []=(field, new_val)
       modifiable_fields[field] = new_val
+      modified_fields[field] = new_val
       super
     end
 
@@ -60,7 +65,7 @@ module Trophonius
                               end
 
           body = { query: [{ foreign_key_field => self[primary_key_field].to_s }], limit: 100_000 }.to_json
-          response = Request.make_request(url, "Bearer #{Request.get_token}", 'post', body)
+          response = DatabaseRequest.make_request(url, "Bearer #{DatabaseRequest.token}", 'post', body)
 
           if response['messages'][0]['code'] == '0'
             r_results = response['response']['data']
@@ -76,7 +81,7 @@ module Trophonius
 
           else
             if response['messages'][0]['code'] == '102'
-              results = Request.retrieve_first(layout)
+              results = DatabaseRequest.retrieve_first(layout)
               if results['messages'][0]['code'] == '0'
                 r_results = results['response']['data']
                 ret_val = r_results.empty? ? Error.throw_error('102') : r_results[0]['fieldData']
@@ -122,7 +127,7 @@ module Trophonius
 
           body = { query: [{ primary_key_field => self[foreign_key_field].to_s }], limit: 1 }.to_json
 
-          response = Request.make_request(url, "Bearer #{Request.get_token}", 'post', body)
+          response = DatabaseRequest.make_request(url, "Bearer #{DatabaseRequest.token}", 'post', body)
           if response['messages'][0]['code'] == '0'
             r_results = response['response']['data']
             ret_val = RecordSet.new(layout, pk_model.non_modifiable_fields)
@@ -137,7 +142,7 @@ module Trophonius
 
           else
             if response['messages'][0]['code'] == '102'
-              results = Request.retrieve_first(layout)
+              results = DatabaseRequest.retrieve_first(layout)
               if results['messages'][0]['code'] == '0'
                 r_results = results['response']['data']
                 ret_val = r_results.empty? ? Error.throw_error('102') : r_results[0]['fieldData']
@@ -170,17 +175,8 @@ module Trophonius
     #
     # @return [String]: string representing the script result returned by FileMaker
     def run_script(script: '', scriptparameter: '')
-      uri = URI::RFC2396_Parser.new
-      url =
-        URI(
-          uri.escape(
-            "http#{Trophonius.config.ssl == true ? 's' : ''}://#{Trophonius.config.host}/fmi/data/v1/databases/#{
-              Trophonius.config.database
-            }/layouts/#{layout_name}/records/#{record_id}?script=#{script}&script.param=#{scriptparameter}"
-          )
-        )
-
-      result = Request.make_request(url, "Bearer #{Request.get_token}", 'get', '{}')
+      url = "/layouts/#{layout_name}/records/#{record_id}?script=#{script}&script.param=#{scriptparameter}"
+      result = DatabaseRequest.make_request(url, 'get', '{}')
 
       if result['messages'][0]['code'] != '0'
         Error.throw_error(result['messages'][0]['code'])
@@ -198,17 +194,10 @@ module Trophonius
     #
     # @return [True] if successful
     def save
-      uri = URI::RFC2396_Parser.new
-      url =
-        URI(
-          uri.escape(
-            "http#{Trophonius.config.ssl == true ? 's' : ''}://#{Trophonius.config.host}/fmi/data/v1/databases/#{
-              Trophonius.config.database
-            }/layouts/#{layout_name}/records/#{record_id}"
-          )
-        )
+      url = "/layouts/#{layout_name}/records/#{record_id}"
+
       body = "{\"fieldData\": #{modified_fields.to_json}}"
-      response = Request.make_request(url, "Bearer #{Request.get_token}", 'patch', body)
+      response = DatabaseRequest.make_request(url, 'patch', body)
       response['messages'][0]['code'] == '0' ? true : Error.throw_error(response['messages'][0]['code'])
     end
 
@@ -218,16 +207,9 @@ module Trophonius
     #
     # @return [True] if successful
     def delete
-      uri = URI::RFC2396_Parser.new
-      url =
-        URI(
-          uri.escape(
-            "http#{Trophonius.config.ssl == true ? 's' : ''}://#{Trophonius.config.host}/fmi/data/v1/databases/#{
-              Trophonius.config.database
-            }/layouts/#{layout_name}/records/#{record_id}"
-          )
-        )
-      response = Request.make_request(url, "Bearer #{Request.get_token}", 'delete', '{}')
+      url = "/layouts/#{layout_name}/records/#{record_id}"
+
+      response = DatabaseRequest.make_request(url, 'delete', '{}')
       response['messages'][0]['code'] == '0' ? true : Error.throw_error(response['messages'][0]['code'])
     end
 
@@ -239,56 +221,32 @@ module Trophonius
     #
     # @return [True] if successful
     def update(field_data, portal_data: {})
-      uri = URI::RFC2396_Parser.new
-      url =
-        URI(
-          uri.escape(
-            "http#{Trophonius.config.ssl == true ? 's' : ''}://#{Trophonius.config.host}/fmi/data/v1/databases/#{
-              Trophonius.config.database
-            }/layouts/#{layout_name}/records/#{record_id}"
-          )
-        )
+      url = "/layouts/#{layout_name}/records/#{record_id}"
       field_data.each_key { |field| modifiable_fields[field] = field_data[field] }
-      new_portal_data = {}
-      portal_data.each do |portal_name, portal_values|
-        new_portal_data.merge!(
-          portal_name =>
-            portal_values.map do |record|
-              record.each_with_object({}) do |(key, value), new_hash|
-                if key.to_s.downcase.include?('id') && key.to_s.downcase.include?('record')
-                  new_hash['recordId'] = value
-                else
-                  new_hash["#{portal_name}::#{key}"] = value
-                end
-              end
-            end
-        )
-      end
-      body =
-        if new_portal_data == {}
-          "{\"fieldData\": #{field_data.to_json} }"
-        else
-          "{\"fieldData\": #{field_data.to_json}, \"portalData\": #{new_portal_data.to_json}}"
-        end
+      field_data.transform_keys! { |k| (@model.configuration.translations[k.to_s] || k).to_s }
 
-      puts "BODY SENT TO FILEMAKER WAS: #{body}"
-      response = Request.make_request(url, "Bearer #{Request.get_token}", 'patch', body)
-      if response['messages'][0]['code'] == '0'
-        true
-      else
-        if response['messages'][0]['code'] == '102'
-          results = Request.retrieve_first(layout_name)
-          if results['messages'][0]['code'] == '0'
-            r_results = results['response']['data']
-            Error.throw_error('102') if r_results.empty?
-            ret_val = r_results[0]['fieldData']
-            Error.throw_error('102', (field_data.keys.map { |key| key.to_s.downcase } - ret_val.keys.map(&:downcase)).flatten.join(', '), layout_name)
-          else
-            Error.throw_error('102')
+      portal_data.each do |portal_name, values|
+        values.map do |record|
+          record.transform_keys! do |k|
+            if k.to_s.downcase.include?('id') && k.to_s.downcase.include?('record')
+              'recordId'
+            else
+              "#{portal_name}::#{key}"
+            end
           end
         end
-        Error.throw_error(response['messages'][0]['code'])
       end
+
+      body = { fieldData: field_data }
+      body.merge!({ portalData: portal_data }) if portal_data.present?
+
+      response = DatabaseRequest.make_request(url, 'patch', body)
+      code = response['messages'][0]['code']
+
+      return throw_field_missing(field_data) if code == '102'
+      return Error.throw_error(code) if code != '0'
+
+      true
     end
 
     ##
@@ -302,17 +260,60 @@ module Trophonius
     # @return [True] if successful
     def upload(container_name:, file:, container_repetition: 1)
       uri = URI::RFC2396_Parser.new
-      url =
-        URI(
-          uri.escape(
-            "http#{Trophonius.config.ssl == true ? 's' : ''}://#{Trophonius.config.host}/fmi/data/v1/databases/#{
-              Trophonius.config.database
-            }/layouts/#{layout_name}/records/#{record_id}/containers/#{container_name}/#{container_repetition}"
-          )
-        )
+      url = "/layouts/#{layout_name}/records/#{record_id}/containers/#{container_name}/#{container_repetition}"
 
-      response = Request.upload_file_request(url, "Bearer #{Request.get_token}", file)
+      response = DatabaseRequest.upload_file_request(url, file)
       response['messages'][0]['code'] == '0' ? true : Error.throw_error(response['messages'][0]['code'])
+    end
+
+    private
+
+    def define_field_assignment(field_name)
+      define_singleton_method("#{field_name}=") do |new_val|
+        self[key] = new_val
+        modifiable_fields[key] = new_val
+        modified_fields[key] = new_val
+      end
+    end
+
+    def define_field_methods(fm_record)
+      @record_id = fm_record['recordId']
+
+      fm_record['fieldData'].each_key do |key|
+        method_name = methodize_field(key)
+        define_singleton_method(method_name) { self[key] }
+        merge!({ key => fm_record['fieldData'][key] })
+
+        next if @model.non_modifiable_fields.include?(key)
+
+        modifiable_fields.merge!({ key => fm_record['fieldData'][key] })
+        define_field_assignment(field_name)
+      end
+    end
+
+    def define_portal_methods(fm_record)
+      fm_record['portalData'].each_key do |key|
+        define_singleton_method(method_name) { self[key] }
+        fm_record['portalData'][key].each do |portal_record|
+          portal_record.each_key do |inner_key|
+            inner_method = methodize_portal_field(inner_key)
+            portal_record.send(:define_singleton_method, inner_method.to_s) { portal_record[inner_key] }
+            portal_record.send(:define_singleton_method, 'record_id') { portal_record['recordId'] }
+          end
+        end
+        merge!({ key => result['portalData'][key] })
+      end
+    end
+
+    def throw_field_missing(field_data)
+      results = DatabaseRequest.retrieve_first(layout_name)
+      if results['messages'][0]['code'] == '0' && !results['response']['data'].empty?
+        r_results = results['response']['data']
+        ret_val = r_results[0]['fieldData']
+        Error.throw_error('102', (field_data.keys.map(&:downcase) - ret_val.keys.map(&:downcase)).flatten.join(', '), layout_name)
+      else
+        Error.throw_error('102')
+      end
     end
   end
 end

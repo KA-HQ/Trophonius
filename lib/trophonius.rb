@@ -1,9 +1,10 @@
-require 'trophonius_request'
-require 'trophonius_model'
-require 'trophonius_config'
-require 'trophonius_date'
-require 'trophonius_time'
-require 'trophonius_date_time'
+require 'connectors/database_request'
+require 'connectors/connection_manager'
+require 'model'
+require 'config'
+require 'date'
+require 'time'
+require 'date_time'
 
 module Trophonius # :nodoc:
   def self.configuration
@@ -13,11 +14,15 @@ module Trophonius # :nodoc:
 
   def self.configure
     yield configuration
+    @connection_manager ||= ConnectionManager.new
+    @configuration
+  end
+
+  def self.connection_manager
+    @connection_manager
   end
 
   def self.config
     @configuration
   end
-
-  private
 end

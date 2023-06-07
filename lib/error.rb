@@ -1,5 +1,5 @@
 require 'json'
-require 'trophonius_config'
+require 'config'
 
 module Trophonius
   module Trophonius::Error

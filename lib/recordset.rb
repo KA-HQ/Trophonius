@@ -1,7 +1,7 @@
 require 'json'
-require 'trophonius_config'
-require 'trophonius_model'
-require 'trophonius_connection'
+require 'config'
+require 'model'
+require 'connectors/connection'
 
 module Trophonius
   # A RecordSet contains all records, as Record, retrieved from the FileMaker database
@@ -20,6 +20,7 @@ module Trophonius
       self.layout_name = l_name
       self.non_modifiable_fields = nmf
       self.records = []
+      super
     end
 
     def <<(data)
@@ -38,8 +39,7 @@ module Trophonius
 
       temp = Trophonius::Model
       temp.config layout_name: layout_name, non_modifiable_fields: non_modifiable_fields
-      retval = temp.where(fielddata)
-      retval
+      temp.where(fielddata)
     end
 
     ##

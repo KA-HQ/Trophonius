@@ -1,8 +1,8 @@
 require 'json'
-require 'trophonius_config'
-require 'trophonius_record'
-require 'trophonius_recordset'
-require 'trophonius_error'
+require 'config'
+require 'record'
+require 'recordset'
+require 'error'
 
 module Trophonius
   class Trophonius::Query
@@ -53,7 +53,7 @@ module Trophonius
     # Returns the current portal limits
     #
     # @return [Hash] Hash representing the portal limits
-    def build_portal_limits()
+    def build_portal_limits
       @portal_limits ||= {}
     end
 
@@ -153,7 +153,7 @@ module Trophonius
     # @param [args] arguments containing the limit and offset
     # @return [Trophonius::Model] updated base model
     def paginate(args)
-      @offset = ((args[0] * args[1] - args[1]) + 1)
+      @offset = (((args[0] * args[1]) - args[1]) + 1)
       @limit = args[1]
       args[2]
     end
@@ -166,11 +166,11 @@ module Trophonius
     def sort(args)
       @trophonius_model.create_translations if @trophonius_model.translations.keys.empty?
       args[0].each do |key, value|
-        if @trophonius_model.translations.key?(key.to_s)
-          args[1].current_query.build_sort << { fieldName: "#{@trophonius_model.translations[key.to_s]}", sortOrder: "#{value}" }
-        else
-          args[1].current_query.build_sort << { fieldName: "#{key}", sortOrder: "#{value}" }
-        end
+        args[1].current_query.build_sort << if @trophonius_model.translations.key?(key.to_s)
+                                              { fieldName: "#{@trophonius_model.translations[key.to_s]}", sortOrder: "#{value}" }
+                                            else
+                                              { fieldName: "#{key}", sortOrder: "#{value}" }
+                                            end
       end
       args[1]
     end
@@ -205,16 +205,13 @@ module Trophonius
           end
         end
       end
-      if @offset.nil? || @limit.nil? || @offset == '' || @limit == '' || @offset == 0 || @limit == 0
-        body = @current_sort.nil? ? { query: new_field_data, limit: '100000' } : { query: new_field_data, sort: @current_sort, limit: '100000' }
-      else
-        body =
-          if @current_sort.nil?
-            { query: new_field_data, limit: @limit.to_s, offset: @offset.to_s }
-          else
-            { query: new_field_data, sort: @current_sort, limit: @limit.to_s, offset: @offset.to_s }
-          end
-      end
+      body = if @offset.nil? || @limit.nil? || @offset == '' || @limit == '' || @offset == 0 || @limit == 0
+               @current_sort.nil? ? { query: new_field_data, limit: '100000' } : { query: new_field_data, sort: @current_sort, limit: '100000' }
+             elsif @current_sort.nil?
+               { query: new_field_data, limit: @limit.to_s, offset: @offset.to_s }
+             else
+               { query: new_field_data, sort: @current_sort, limit: @limit.to_s, offset: @offset.to_s }
+             end
 
       if @post_request_script.present?
         body.merge!(script: @post_request_script)
@@ -222,44 +219,26 @@ module Trophonius
       end
 
       if @prerequest_script.present?
-        body.merge!("script.prerequest" => @prerequest_script)
+        body.merge!('script.prerequest' => @prerequest_script)
         body.merge!('script.prerequest.param' => @prerequest_scriptparam) if @prerequest_scriptparam.present?
       end
 
       if @presort_script.present?
-        body.merge!("script.presort" => @presort_script)
+        body.merge!('script.presort' => @presort_script)
         body.merge!('script.presort.param' => @presort_scriptparam) if @presort_scriptparam.present?
       end
 
       if @portal_limits
-        portal_hash = { portal: @portal_limits.map { |portal_name, limit| "#{portal_name}" } }
+        portal_hash = { portal: @portal_limits.map { |portal_name, _limit| "#{portal_name}" } }
         body.merge!(portal_hash)
         @portal_limits.each { |portal_name, limit| body.merge!({ "limit.#{portal_name}" => limit.to_s }) }
         puts body
       end
 
       body = body.to_json
-      response = Request.make_request(url, "Bearer #{Request.get_token}", 'post', body)
+      response = DatabaseRequest.make_request(url, "Bearer #{DatabaseRequest.token}", 'post', body)
 
-      if response['messages'][0]['code'] != '0'
-        if response['messages'][0]['code'] == '101' || response['messages'][0]['code'] == '401'
-          resp = RecordSet.new(@trophonius_model.layout_name, @trophonius_model.non_modifiable_fields).send(method, *args, &block)
-          return resp
-        else
-          if response['messages'][0]['code'] == '102'
-            results = Request.retrieve_first(@trophonius_model.layout_name)
-            if results['messages'][0]['code'] != '0'
-              Error.throw_error('102')
-            else
-              r_results = results['response']['data']
-              ret_val = r_results.empty? ? Error.throw_error('102') : r_results[0]['fieldData']
-              query_keys = new_field_data.map { |q| q.keys.map(&:downcase) }.uniq
-              Error.throw_error('102', (query_keys - ret_val.keys.map(&:downcase)).flatten.join(', '), @trophonius_model.layout_name)
-            end
-          end
-          Error.throw_error(response['messages'][0]['code'])
-        end
-      else
+      if response['messages'][0]['code'] == '0'
         r_results = response['response']['data']
         ret_val = RecordSet.new(@trophonius_model.layout_name, @trophonius_model.non_modifiable_fields)
 
@@ -286,7 +265,23 @@ module Trophonius
           ret_val << hash
         end
         @response = ret_val
-        return @response.send(method, *args, &block)
+        @response.send(method, *args, &block)
+      elsif response['messages'][0]['code'] == '101' || response['messages'][0]['code'] == '401'
+        RecordSet.new(@trophonius_model.layout_name, @trophonius_model.non_modifiable_fields).send(method, *args, &block)
+
+      else
+        if response['messages'][0]['code'] == '102'
+          results = DatabaseRequest.retrieve_first(@trophonius_model.layout_name)
+          if results['messages'][0]['code'] == '0'
+            r_results = results['response']['data']
+            ret_val = r_results.empty? ? Error.throw_error('102') : r_results[0]['fieldData']
+            query_keys = new_field_data.map { |q| q.keys.map(&:downcase) }.uniq
+            Error.throw_error('102', (query_keys - ret_val.keys.map(&:downcase)).flatten.join(', '), @trophonius_model.layout_name)
+          else
+            Error.throw_error('102')
+          end
+        end
+        Error.throw_error(response['messages'][0]['code'])
       end
     end
 
