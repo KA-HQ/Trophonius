@@ -11,7 +11,7 @@ Gem::Specification.new do |s|
   s.license = 'MIT'
   s.require_paths = %w[lib]
 
-  s.add_runtime_dependency 'redis', '~> 6.0'
+  s.add_runtime_dependency 'redis', '~> 4.0'
   s.add_runtime_dependency 'typhoeus', '~> 1.3'
   s.add_dependency 'active_support', '~> 7'
 
