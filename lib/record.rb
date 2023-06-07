@@ -1,6 +1,5 @@
 # frozen_string_literal: true
-
-require 'active_support/inflector'
+require 'active_support/all'
 require 'json'
 require 'config'
 require 'translator'

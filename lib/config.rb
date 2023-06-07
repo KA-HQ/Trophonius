@@ -1,4 +1,4 @@
-require 'active_support/configurable'
+require 'active_support/all'
 require 'ethon'
 
 module Trophonius

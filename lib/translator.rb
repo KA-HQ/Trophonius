@@ -1,4 +1,4 @@
-require 'active_support/inflector'
+require 'active_support/all'
 module Trophonius
   module Translator
     def methodize_field(field_name)
