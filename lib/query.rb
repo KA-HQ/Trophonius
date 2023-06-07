@@ -167,9 +167,9 @@ module Trophonius
       @trophonius_model.create_translations if @trophonius_model.translations.keys.empty?
       args[0].each do |key, value|
         args[1].current_query.build_sort << if @trophonius_model.translations.key?(key.to_s)
-                                              { fieldName: "#{@trophonius_model.translations[key.to_s]}", sortOrder: "#{value}" }
+                                              { fieldName: @trophonius_model.translations[key.to_s], sortOrder: value }
                                             else
-                                              { fieldName: "#{key}", sortOrder: "#{value}" }
+                                              { fieldName: key, sortOrder: value }
                                             end
       end
       args[1]
