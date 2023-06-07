@@ -1,10 +1,12 @@
+require 'time'
+
+require 'date_time'
+require 'date'
+
 require 'connectors/database_request'
 require 'connectors/connection_manager'
 require 'model'
 require 'config'
-require 'date'
-require 'time'
-require 'date_time'
 
 module Trophonius # :nodoc:
   def self.configuration

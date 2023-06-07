@@ -1,4 +1,7 @@
-require 'active_support/all'
+require 'time'
+require 'date_time'
+require 'date'
+require 'active_support/inflector'
 module Trophonius
   module Translator
     def methodize_field(field_name)

@@ -5,7 +5,11 @@ require 'recordset'
 require 'translator'
 require 'query'
 require 'error'
-require 'active_support/all'
+require 'time'
+require 'date_time'
+require 'date'
+
+require 'active_support/inflector'
 
 module Trophonius
   # This class will retrieve the records from the FileMaker database and build a RecordSet filled with Record objects.

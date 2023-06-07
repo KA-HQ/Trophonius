@@ -1,4 +1,8 @@
-require 'active_support/all'
+require 'time'
+require 'date_time'
+require 'date'
+
+require 'active_support/configurable'
 require 'ethon'
 
 module Trophonius
