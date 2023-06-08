@@ -1,4 +1,8 @@
 # frozen_string_literal: true
+
+require 'time'
+require 'date_time'
+require 'date'
 require 'active_support/inflector'
 require 'json'
 require 'config'
