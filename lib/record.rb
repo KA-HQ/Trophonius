@@ -226,7 +226,7 @@ module Trophonius
     def update(field_data, portal_data: {})
       url = "/layouts/#{layout_name}/records/#{record_id}"
       field_data.each_key { |field| modifiable_fields[field] = field_data[field] }
-      field_data.transform_keys! { |k| (@model.configuration.translations[k.to_s] || k).to_s }
+      field_data.transform_keys! { |k| (@model.translations[k.to_s] || k).to_s }
 
       portal_data.each do |portal_name, values|
         values.map do |record|
