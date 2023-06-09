@@ -69,7 +69,8 @@ module Trophonius
     #
     # @return [JSON] parsed json of the response
     def self.upload_file_request(url_param, file)
-      url = URI(url_param.to_s)
+      base_url = "http#{Trophonius.config.ssl == true ? 's' : ''}://#{Trophonius.config.host}/fmi/data/v1/databases/#{Trophonius.config.database}"
+      url = URI("#{base_url}/#{url_param}")
 
       https = Net::HTTP.new(url.host, url.port)
       https.use_ssl = true
