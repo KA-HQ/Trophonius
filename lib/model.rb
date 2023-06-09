@@ -119,7 +119,7 @@ module Trophonius
     #
     # @return [Hash] translations of the fields Rails -> FileMaker
     def self.create_translations
-      include Trophonius::Translator
+      extend Trophonius::Translator
       field_names = if Trophonius.config.fm_18
                       Trophonius::DatabaseRequest.get_layout_field_names(layout_name)
                     else
