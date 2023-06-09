@@ -178,7 +178,7 @@ module Trophonius
     #
     # @return [String]: string representing the script result returned by FileMaker
     def run_script(script: '', scriptparameter: '')
-      url = "/layouts/#{layout_name}/records/#{record_id}?script=#{script}&script.param=#{scriptparameter}"
+      url = "layouts/#{layout_name}/records/#{record_id}?script=#{script}&script.param=#{scriptparameter}"
       result = DatabaseRequest.make_request(url, 'get', '{}')
 
       if result['messages'][0]['code'] != '0'
@@ -197,7 +197,7 @@ module Trophonius
     #
     # @return [True] if successful
     def save
-      url = "/layouts/#{layout_name}/records/#{record_id}"
+      url = "layouts/#{layout_name}/records/#{record_id}"
 
       body = "{\"fieldData\": #{modified_fields.to_json}}"
       response = DatabaseRequest.make_request(url, 'patch', body)
@@ -210,7 +210,7 @@ module Trophonius
     #
     # @return [True] if successful
     def delete
-      url = "/layouts/#{layout_name}/records/#{record_id}"
+      url = "layouts/#{layout_name}/records/#{record_id}"
 
       response = DatabaseRequest.make_request(url, 'delete', '{}')
       response['messages'][0]['code'] == '0' ? true : Error.throw_error(response['messages'][0]['code'])
@@ -224,7 +224,7 @@ module Trophonius
     #
     # @return [True] if successful
     def update(field_data, portal_data: {})
-      url = "/layouts/#{layout_name}/records/#{record_id}"
+      url = "layouts/#{layout_name}/records/#{record_id}"
       field_data.each_key { |field| modifiable_fields[field] = field_data[field] }
       field_data.transform_keys! { |k| (@model.translations[k.to_s] || k).to_s }
 
@@ -262,7 +262,7 @@ module Trophonius
     #
     # @return [True] if successful
     def upload(container_name:, file:, container_repetition: 1)
-      url = "/layouts/#{layout_name}/records/#{record_id}/containers/#{container_name}/#{container_repetition}"
+      url = "layouts/#{layout_name}/records/#{record_id}/containers/#{container_name}/#{container_repetition}"
 
       response = DatabaseRequest.upload_file_request(url, file)
       response['messages'][0]['code'] == '0' ? true : Error.throw_error(response['messages'][0]['code'])

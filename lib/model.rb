@@ -220,7 +220,7 @@ module Trophonius
     # @return [Record] a Record object that correspond to FileMaker record fitting the find request
     #   Model.find_by(fieldOne: "Data")
     def self.find_by(field_data)
-      url = "/layouts/#{layout_name}/_find?_limit=1"
+      url = "layouts/#{layout_name}/_find?_limit=1"
       create_translations if @configuration.translations.keys.empty?
 
       field_data.transform_keys! { |k| (@configuration.translations[k.to_s] || k).to_s }
@@ -246,7 +246,7 @@ module Trophonius
     def self.find(record_id)
       create_translations if @configuration.translations.keys.empty?
 
-      url = "/layouts/#{layout_name}/records/#{record_id}"
+      url = "layouts/#{layout_name}/records/#{record_id}"
       response = DatabaseRequest.make_request(url, 'get', '{}')
       if response['messages'][0]['code'] == '0'
         ret_val = build_result(response['response']['data'][0])
@@ -266,7 +266,7 @@ module Trophonius
     def self.delete(record_id)
       create_translations if @configuration.translations.keys.empty?
 
-      url = "/layouts/#{layout_name}/records/#{record_id}"
+      url = "layouts/#{layout_name}/records/#{record_id}"
       response = DatabaseRequest.make_request(url, 'delete', '{}')
       if response['messages'][0]['code'] == '0'
         true
@@ -284,7 +284,7 @@ module Trophonius
     #
     # @return [Boolean] True if the delete was successful
     def self.edit(record_id, field_data)
-      url = "/layouts/#{layout_name}/records/#{record_id}"
+      url = "layouts/#{layout_name}/records/#{record_id}"
       new_field_data = {}
       create_translations if @configuration.translations.keys.empty?
 

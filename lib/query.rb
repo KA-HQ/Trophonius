@@ -184,7 +184,7 @@ module Trophonius
     #
     # @return Response of the called method
     def run_query(method, *args, &block)
-      url = "/layouts/#{@trophonius_model.layout_name}/_find"
+      url = "layouts/#{@trophonius_model.layout_name}/_find"
       new_field_data = @current_query.map { |_q| {} }
 
       @trophonius_model.create_translations if @trophonius_model.translations.keys.empty?
