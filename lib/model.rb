@@ -15,7 +15,6 @@ module Trophonius
   # This class will retrieve the records from the FileMaker database and build a RecordSet filled with Record objects.
   # One Record object represents a record in FileMaker.
   class Model
-    include Trophonius::Translator
     attr_reader :configuration
     attr_accessor :current_query
 
@@ -120,15 +119,19 @@ module Trophonius
     #
     # @return [Hash] translations of the fields Rails -> FileMaker
     def self.create_translations
-      if Trophonius.config.fm_18
-        field_names = Trophonius::DatabaseRequest.get_layout_field_names(layout_name)
-        field_names.each do |field|
-          @configuration.translations.merge!(
-            { methodize_field(field.to_s).to_s => field.to_s }
-          )
-        end
-      else
-        first
+      include Trophonius::Translator
+      field_names = if Trophonius.config.fm_18
+                      Trophonius::DatabaseRequest.get_layout_field_names(layout_name)
+                    else
+                      DatabaseRequest.retrieve_first(layout_name).dig(
+                        'response', 'data', 0, 'fieldData'
+                      ).keys
+                    end
+      field_names.each do |field|
+        new_name = methodize_field(field.to_s).to_s
+        @configuration.translations.merge!(
+          { new_name => field.to_s }
+        )
       end
       @configuration.translations
     end

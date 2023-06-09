@@ -26,7 +26,7 @@ module Trophonius
       @layout_name = @model.layout_name
       define_field_methods(fm_record)
       define_portal_methods(fm_record)
-      super
+      super()
     end
 
     def []=(field, new_val)
@@ -290,12 +290,13 @@ module Trophonius
         next if @model.non_modifiable_fields.include?(key)
 
         modifiable_fields.merge!({ key => fm_record['fieldData'][key] })
-        define_field_assignment(field_name)
+        define_field_assignment(method_name)
       end
     end
 
     def define_portal_methods(fm_record)
       fm_record['portalData'].each_key do |key|
+        method_name = methodize_field(key)
         define_singleton_method(method_name) { self[key] }
         fm_record['portalData'][key].each do |portal_record|
           portal_record.each_key do |inner_key|
@@ -304,7 +305,7 @@ module Trophonius
             portal_record.send(:define_singleton_method, 'record_id') { portal_record['recordId'] }
           end
         end
-        merge!({ key => result['portalData'][key] })
+        merge!({ key => fm_record['portalData'][key] })
       end
     end
 
