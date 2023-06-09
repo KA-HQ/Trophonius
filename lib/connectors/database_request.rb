@@ -75,6 +75,7 @@ module Trophonius
       https = Net::HTTP.new(url.host, url.port)
       https.use_ssl = true
 
+      id = SecureRandom.uuid
       request = Net::HTTP::Post.new(url)
       request['Authorization'] = auth_header_bearer(id)
       request['Content-Type'] = 'multipart/form-data;'
