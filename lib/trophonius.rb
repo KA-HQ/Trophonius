@@ -1,8 +1,6 @@
 require 'fm_time'
-# require 'date_time'
-# require 'date'
-
-require 'active_support'
+require 'fm_date_time'
+require 'fm_date'
 
 require 'connectors/database_request'
 require 'connectors/connection_manager'
