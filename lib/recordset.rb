@@ -20,7 +20,6 @@ module Trophonius
       self.layout_name = l_name
       self.non_modifiable_fields = nmf
       self.records = []
-      super
     end
 
     def <<(data)
