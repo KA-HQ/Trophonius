@@ -1,7 +1,8 @@
 require 'time'
-
 require 'date_time'
 require 'date'
+
+require 'active_support'
 
 require 'connectors/database_request'
 require 'connectors/connection_manager'
