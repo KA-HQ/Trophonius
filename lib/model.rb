@@ -34,7 +34,7 @@ module Trophonius
     def self.config(configuration)
       @configuration ||= Configuration.new
       @configuration.layout_name = configuration[:layout_name]
-      @configuration.non_modifiable_fields = configuration[:non_modifiable_fields]
+      @configuration.non_modifiable_fields = configuration[:non_modifiable_fields] || []
       @configuration.translations = {}
       @configuration.has_many_relations = {}
       @configuration.belongs_to_relations = {}
