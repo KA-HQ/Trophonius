@@ -13,7 +13,7 @@ Gem::Specification.new do |s|
 
   s.add_runtime_dependency 'redis', '~> 4.0'
   s.add_runtime_dependency 'typhoeus', '~> 1.3'
-  s.add_dependency 'activesupport', '~> 7.0'
+  s.add_dependency 'activesupport', '>= 7.0'
 
   # s.add_development_dependency 'solargraph', '~> 0.32', ">= 0.32.0"
   s.metadata['rubygems_mfa_required'] = 'true'
