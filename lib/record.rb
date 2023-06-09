@@ -234,7 +234,7 @@ module Trophonius
             if k.to_s.downcase.include?('id') && k.to_s.downcase.include?('record')
               'recordId'
             else
-              "#{portal_name}::#{key}"
+              "#{portal_name}::#{k}"
             end
           end
         end
