@@ -89,7 +89,7 @@ module Trophonius
       when '101'
         raise RecordNotFoundError.new, "Record #{more_info} was not found"
       when '102'
-        raise FieldUnexistingError.new, 'Field does not exist' if more_info.zero?
+        raise FieldUnexistingError.new, 'Field does not exist' if more_info.is_a?(Integer) && more_info.zero?
 
         raise FieldUnexistingError.new, "Following field(s) #{more_info} do not exist on layout #{layout_info}"
       when '103'
