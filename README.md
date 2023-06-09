@@ -96,10 +96,10 @@ To create a new record in the FileMaker database you only have to call the creat
   MyModel.create(field_one: "Data", number_field: 1)
 ```
 
-The new record will be created immediately and filled with the provided data. The fieldnames are the same as the names in FileMaker. If the fieldname in FileMaker contains non-word characters, the fieldname should be in quotes. This method returns the created record as a Trophonius::Record instance. If you have a portal on your layout, you can fill the portal by adding a portalData parameter:
+The new record will be created immediately and filled with the provided data. The fieldnames are the same as the names in FileMaker. If the fieldname in FileMaker contains non-word characters, the fieldname should be in quotes. This method returns the created record as a Trophonius::Record instance. If you have a portal on your layout, you can fill the portal by adding a portal_data parameter:
 
 ```ruby
-  MyModel.create(field_one: "Data", number_field: 1, portalData: {
+  MyModel.create(field_one: "Data", number_field: 1, portal_data: {
     "MyPortalOccurrenceName" => [
       { "portalField" => "value" },
       { "portalField" => "value2" },
@@ -108,7 +108,7 @@ The new record will be created immediately and filled with the provided data. Th
   })
 ```
 
-The field in your portalData parameter have to be the same as the fieldnames in FileMaker, currently the translations don't work. You should also add
+The field in your portal_data parameter have to be the same as the fieldnames in FileMaker, currently the translations don't work. You should also add
 
 ## Get records
 
@@ -215,6 +215,11 @@ To close the connection to the FileMaker server simply call:
 ```ruby
   Trophonius::Connection.disconnect
 ```
+
+# Upgrading to 2.0
+
+Trophonius 2.0 has been released 🎉
+This introduced one breaking change: the parameters "portalData" for the create and update methods have been renamed to "portal_data" to conform to Rubys naming conventions
 
 # To do
 

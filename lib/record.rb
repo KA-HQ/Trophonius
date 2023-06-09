@@ -262,7 +262,6 @@ module Trophonius
     #
     # @return [True] if successful
     def upload(container_name:, file:, container_repetition: 1)
-      uri = URI::RFC2396_Parser.new
       url = "/layouts/#{layout_name}/records/#{record_id}/containers/#{container_name}/#{container_repetition}"
 
       response = DatabaseRequest.upload_file_request(url, file)
@@ -271,7 +270,7 @@ module Trophonius
 
     private
 
-    def define_field_assignment(field_name)
+    def define_field_assignment(field_name, key)
       define_singleton_method("#{field_name}=") do |new_val|
         self[key] = new_val
         modifiable_fields[key] = new_val
@@ -290,7 +289,7 @@ module Trophonius
         next if @model.non_modifiable_fields.include?(key)
 
         modifiable_fields.merge!({ key => fm_record['fieldData'][key] })
-        define_field_assignment(method_name)
+        define_field_assignment(method_name, key)
       end
     end
 

@@ -207,7 +207,9 @@ module Trophonius
       return Error.throw_error(response['messages'][0]['code']) if response['messages'][0]['code'] != '0'
 
       new_record = DatabaseRequest.make_request("/layouts/#{layout_name}/records/#{response['response']['recordId']}", 'get', '{}')
-      build_result(new_record['response']['data'][0]).send(:define_singleton_method, 'result_count') { 1 }
+      record = build_result(new_record['response']['data'][0])
+      record.send(:define_singleton_method, 'result_count') { 1 }
+      record
     end
 
     ##
