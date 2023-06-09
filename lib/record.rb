@@ -243,7 +243,7 @@ module Trophonius
       body = { fieldData: field_data }
       body.merge!({ portalData: portal_data }) if portal_data.present?
 
-      response = DatabaseRequest.make_request(url, 'patch', body)
+      response = DatabaseRequest.make_request(url, 'patch', body.to_json)
       code = response['messages'][0]['code']
 
       return throw_field_missing(field_data) if code == '102'
