@@ -271,7 +271,7 @@ module Trophonius
     private
 
     def define_field_assignment(field_name, key)
-      define_method("#{field_name}=") do |new_val|
+      define_singleton_method("#{field_name}=") do |new_val|
         self[key] = new_val
         modifiable_fields[key] = new_val
         modified_fields[key] = new_val
@@ -283,7 +283,7 @@ module Trophonius
 
       fm_record['fieldData'].each_key do |key|
         method_name = methodize_field(key)
-        define_method(method_name) { self[key] }
+        define_singleton_method(method_name) { self[key] }
         merge!({ key => fm_record['fieldData'][key] })
 
         next if @model.non_modifiable_fields.include?(key)
@@ -296,12 +296,12 @@ module Trophonius
     def define_portal_methods(fm_record)
       fm_record['portalData'].each_key do |key|
         method_name = methodize_field(key)
-        define_method(method_name) { self[key] }
+        define_singleton_method(method_name) { self[key] }
         fm_record['portalData'][key].each do |portal_record|
           portal_record.each_key do |inner_key|
             inner_method = methodize_portal_field(inner_key)
-            portal_record.send(:define_method, inner_method.to_s) { portal_record[inner_key] }
-            portal_record.send(:define_method, 'record_id') { portal_record['recordId'] }
+            portal_record.send(:define_singleton_method, inner_method.to_s) { portal_record[inner_key] }
+            portal_record.send(:define_singleton_method, 'record_id') { portal_record['recordId'] }
           end
         end
         merge!({ key => fm_record['portalData'][key] })
