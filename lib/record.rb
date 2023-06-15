@@ -45,16 +45,7 @@ module Trophonius
           layout = model.layout_name
           model.create_translations if model.translations.keys.empty?
 
-          uri = URI::RFC2396_Parser.new
-          url =
-            URI(
-              uri.escape(
-                "http#{Trophonius.config.ssl == true ? 's' : ''}://#{Trophonius.config.host}/fmi/data/v1/databases/#{
-                  Trophonius.config.database
-                }/layouts/#{layout}/_find"
-              )
-            )
-
+          url = "/layouts/#{layout}/_find"
           foreign_key_field = if model.translations.key?(relation[:foreign_key])
                                 model.translations[relation[:foreign_key]].to_s
                               else
@@ -106,15 +97,7 @@ module Trophonius
           layout = pk_model.layout_name
           pk_model.create_translations if pk_model.translations.keys.empty?
 
-          uri = URI::RFC2396_Parser.new
-          url =
-            URI(
-              uri.escape(
-                "http#{Trophonius.config.ssl == true ? 's' : ''}://#{Trophonius.config.host}/fmi/data/v1/databases/#{
-                  Trophonius.config.database
-                }/layouts/#{layout}/_find"
-              )
-            )
+          url = "/layouts/#{layout}/_find"
 
           foreign_key_field = if fk_model.translations.key?(relation[:foreign_key])
                                 fk_model.translations[relation[:foreign_key]].to_s
