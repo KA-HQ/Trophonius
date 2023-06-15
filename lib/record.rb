@@ -68,7 +68,7 @@ module Trophonius
                               end
 
           body = { query: [{ foreign_key_field => self[primary_key_field].to_s }], limit: 100_000 }.to_json
-          response = DatabaseRequest.make_request(url, "Bearer #{DatabaseRequest.token}", 'post', body)
+          response = DatabaseRequest.make_request(url, 'post', body)
 
           if response['messages'][0]['code'] == '0'
             r_results = response['response']['data']
@@ -130,7 +130,7 @@ module Trophonius
 
           body = { query: [{ primary_key_field => self[foreign_key_field].to_s }], limit: 1 }.to_json
 
-          response = DatabaseRequest.make_request(url, "Bearer #{DatabaseRequest.token}", 'post', body)
+          response = DatabaseRequest.make_request(url, 'post', body)
           if response['messages'][0]['code'] == '0'
             r_results = response['response']['data']
             ret_val = RecordSet.new(layout, pk_model.non_modifiable_fields)
