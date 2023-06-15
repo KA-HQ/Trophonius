@@ -358,7 +358,8 @@ module Trophonius
       path = "/layouts/#{layout_name}/records?"
       path += @limit.present? ? "_limit=#{@limit}" : '_limit=10000000'
       path += "&_offset=#{@offset}" if @offset.present?
-      path += "&_sort=#{sort}" unless sort.blank?
+      sort = sort.map { |k, v| { fieldName: k, sortOrder: v } }
+      path += "&_sort=#{sort.to_json}" unless sort.blank?
 
       @limit = ''
       @offset = ''
