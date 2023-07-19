@@ -211,7 +211,7 @@ module Trophonius
       field_data.each_key { |field| modifiable_fields[field] = field_data[field] }
       field_data.transform_keys! { |k| (@model.translations[k.to_s] || k).to_s }
 
-      puts record_id
+      puts "RECORD ID WAS #{record_id}"
 
       portal_data.each do |portal_name, values|
         values.map do |record|
