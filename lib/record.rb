@@ -231,6 +231,7 @@ module Trophonius
       response = DatabaseRequest.make_request(url, 'patch', body.to_json)
       code = response['messages'][0]['code']
 
+      puts "MESSAGES: #{response['messages']}"
       return throw_field_missing(field_data) if code == '102'
       return Error.throw_error(code) if code != '0'
 
