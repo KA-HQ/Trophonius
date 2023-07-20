@@ -50,7 +50,7 @@ module Trophonius
         )
 
       DebugPrinter.print_debug('USED URL', url)
-      DebugPrinter.print_debug('SENT BODY', JSON.pretty_generate(JSON.parse(body)))
+      DebugPrinter.print_debug('SENT BODY', body)
 
       temp = request.run
 
