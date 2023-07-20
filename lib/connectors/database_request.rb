@@ -2,6 +2,7 @@
 
 require 'base64'
 require 'connectors/connection_manager'
+require 'debug'
 require 'typhoeus'
 require 'uri'
 require 'securerandom'
@@ -9,6 +10,7 @@ require 'net/http'
 
 module Trophonius
   module DatabaseRequest
+    include Debug
     ##
     # Crafts and runs a HTTP request of any type
     #
@@ -47,23 +49,17 @@ module Trophonius
           headers: { 'Content-Type' => 'application/json', Authorization: auth }
         )
 
-      puts "USED URL: #{url}" if Trophonius.config.debug == true
-
-      puts '======== SENT BODY ========' if Trophonius.config.debug == true
-      puts JSON.pretty_generate(body) if Trophonius.config.debug == true
-      puts '======== SENT BODY ========' if Trophonius.config.debug == true
+      print_debug('USED URL', url)
+      print_debug('SENT BODY', JSON.pretty_generate(JSON.parse(body)))
 
       temp = request.run
-      response_body = temp.response_body
-
-      puts '======== RECEIVED BODY ========' if Trophonius.config.debug == true
-      puts JSON.pretty_generate(response_body) if Trophonius.config.debug == true
-      puts '======== RECEIVED BODY ========' if Trophonius.config.debug == true
 
       Trophonius.connection_manager.dequeue(id) if bypass_queue_with.empty?
 
       begin
-        JSON.parse(response_body)
+        response_body = JSON.parse(temp.response_body)
+        print_debug('RECEIVED BODY', JSON.pretty_generate(response_body))
+        response_body
       rescue StandardError => e
         puts e
         puts e.backtrace
