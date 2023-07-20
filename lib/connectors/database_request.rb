@@ -46,11 +46,24 @@ module Trophonius
           ssl_verifypeer: ssl_verifypeer,
           headers: { 'Content-Type' => 'application/json', Authorization: auth }
         )
+
+      puts "USED URL: #{url}" if Trophonius.config.debug == true
+
+      puts '======== SENT BODY ========' if Trophonius.config.debug == true
+      puts JSON.pretty_generate(body) if Trophonius.config.debug == true
+      puts '======== SENT BODY ========' if Trophonius.config.debug == true
+
       temp = request.run
+      response_body = temp.response_body
+
+      puts '======== RECEIVED BODY ========' if Trophonius.config.debug == true
+      puts JSON.pretty_generate(response_body) if Trophonius.config.debug == true
+      puts '======== RECEIVED BODY ========' if Trophonius.config.debug == true
+
       Trophonius.connection_manager.dequeue(id) if bypass_queue_with.empty?
 
       begin
-        JSON.parse(temp.response_body)
+        JSON.parse(response_body)
       rescue StandardError => e
         puts e
         puts e.backtrace
