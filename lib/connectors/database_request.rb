@@ -49,8 +49,8 @@ module Trophonius
           headers: { 'Content-Type' => 'application/json', Authorization: auth }
         )
 
-      print_debug('USED URL', url)
-      print_debug('SENT BODY', JSON.pretty_generate(JSON.parse(body)))
+      DebugPrinter.print_debug('USED URL', url)
+      DebugPrinter.print_debug('SENT BODY', JSON.pretty_generate(JSON.parse(body)))
 
       temp = request.run
 
@@ -58,7 +58,7 @@ module Trophonius
 
       begin
         response_body = JSON.parse(temp.response_body)
-        print_debug('RECEIVED BODY', JSON.pretty_generate(response_body))
+        DebugPrinter.print_debug('RECEIVED BODY', JSON.pretty_generate(response_body))
         response_body
       rescue StandardError => e
         puts e

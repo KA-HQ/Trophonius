@@ -1,6 +1,6 @@
 module Trophonius
   module DebugPrinter
-    def print_debug(open_close_message, message)
+    def self.print_debug(open_close_message, message)
       return unless Trophonius.config.debug == true
 
       puts "======== #{open_close_message} ========"
