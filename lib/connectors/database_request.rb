@@ -2,7 +2,7 @@
 
 require 'base64'
 require 'connectors/connection_manager'
-require 'debug'
+require 'debug_printer'
 require 'typhoeus'
 require 'uri'
 require 'securerandom'
@@ -10,7 +10,7 @@ require 'net/http'
 
 module Trophonius
   module DatabaseRequest
-    include Debug
+    include DebugPrinter
     ##
     # Crafts and runs a HTTP request of any type
     #

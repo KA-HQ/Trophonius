@@ -1,5 +1,5 @@
 module Trophonius
-  module Debug
+  module DebugPrinter
     def print_debug(open_close_message, message)
       return unless Trophonius.config.debug == true
 
