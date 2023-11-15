@@ -22,7 +22,7 @@ Install the gem yourself
 Or add to your gemfile
 
 ```ruby
- gem 'trophonius', '~> 1.4'
+ gem 'trophonius', '~> 2.1'
 ```
 
 And run bundle install
@@ -51,6 +51,8 @@ Trophonius.configure do |config|
   config.redis_connection = true # default false, true if you want to store the token in redis
   config.ssl = true # or false depending on whether https or http should be used
   config.fm_18 = true # use if FileMaker server version >= 18, default true
+  config.debug = false # will output more information when true
+  config.pool_size = ENV.fetch('trophonius_pool', 5) # use multiple data api connections with a loadbalancer to improve performance
   # USE THE NEXT OPTION WITH CAUTION
   config.local_network = true # if true the ssl certificate will not be verified to allow for self-signed certificates
 end
