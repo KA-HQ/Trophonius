@@ -53,6 +53,7 @@ module Trophonius
 
       begin
         parsed = JSON.parse(temp.response_body)
+        puts parsed if Trophonius.config.debug == true
       rescue StandardError => e
         puts e
         puts e.backtrace
