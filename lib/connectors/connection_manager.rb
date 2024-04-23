@@ -1,7 +1,5 @@
 module Trophonius
   class ConnectionManager
-    attr_reader :connections
-
     def initialize
       @connections = {}
       Trophonius.config.pool_size.times do
@@ -22,6 +20,10 @@ module Trophonius
       connection[:queue].delete_if { |q_id| q_id == id }
       puts "out,#{connection[:connection].id},#{connection[:connection].token},#{connection[:queue].length}" if Trophonius.config.debug == true
       nil
+    end
+
+    def disconnect_all
+      @connections.each { |_connection_id, connection| connection[:connection].disconnect }
     end
 
     private
