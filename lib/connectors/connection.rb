@@ -2,9 +2,11 @@ require 'time'
 require 'base64'
 require 'securerandom'
 require 'connectors/redis_manager'
+require 'debug_printer'
 
 module Trophonius
   class Connection
+    include DebugPrinter
     attr_reader :id
 
     def initialize
@@ -53,7 +55,8 @@ module Trophonius
 
       begin
         parsed = JSON.parse(temp.response_body)
-        puts parsed if Trophonius.config.debug == true
+
+        DebugPrinter.print_debug('RECEIVED DISCONNECT', parsed)
       rescue StandardError => e
         puts e
         puts e.backtrace

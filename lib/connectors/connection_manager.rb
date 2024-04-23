@@ -1,10 +1,14 @@
+require 'debug_printer'
 module Trophonius
   class ConnectionManager
+    include DebugPrinter
     def initialize
       @connections = {}
       Trophonius.config.pool_size.times do
         connection = Connection.new
         @connections[connection.id] = { connection: connection, queue: [] }
+
+        DebugPrinter.print_debug('CONNECTION CREATED', @connections[connection.id].inspect)
       end
     end
 
