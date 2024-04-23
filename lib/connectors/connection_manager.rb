@@ -1,5 +1,7 @@
 module Trophonius
   class ConnectionManager
+    attr_reader :connections
+
     def initialize
       @connections = {}
       Trophonius.config.pool_size.times do
