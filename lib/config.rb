@@ -27,6 +27,7 @@ module Trophonius
     config_accessor(:belongs_to_relations) { {} }
     config_accessor(:local_network) { false }
     config_accessor(:redis_connection) { false }
+    config_accessor(:redis_no_verify) { false }
     config_accessor(:pool_size) { 5 }
     config_accessor(:debug) { false }
   end

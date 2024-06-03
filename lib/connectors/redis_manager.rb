@@ -2,16 +2,15 @@ module Trophonius
   # the RedisManager module is used to create a (single) connection to a redis store.
   module Trophonius::RedisManager
     def self.connect
-      if Trophonius.config.redis_connection
-        if ENV['REDIS_URL'] && ENV['REDIS_URL'] != '' && ENV['REDIS_NO_VERIFY_MODE']
-          @redis ||= Redis.new(url: ENV['REDIS_URL'], ssl_params: { verify_mode: OpenSSL::SSL::VERIFY_NONE })
-        elsif ENV['REDIS_URL'] && ENV['REDIS_URL'] != ''
-          @redis ||= Redis.new(url: ENV['REDIS_URL'])
-        else
-          @redis ||= Redis.new
-        end
-      end
-      return nil
+      return unless Trophonius.config.redis_connection
+
+      redis_url = ENV.fetch('REDIS_URL')
+      options = {}
+      options.merge!(url: redis_url) if redis_url && redis_url != ''
+      options.merge!(ssl_params: { verify_mode: OpenSSL::SSL::VERIFY_NONE }) if Trophonius.config.redis_no_verify
+      @redis ||= Redis.new(options)
+
+      nil
     end
 
     ##
