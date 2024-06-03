@@ -3,7 +3,9 @@ module Trophonius
   module Trophonius::RedisManager
     def self.connect
       if Trophonius.config.redis_connection
-        if ENV['REDIS_URL'] && ENV['REDIS_URL'] != ''
+        if ENV['REDIS_URL'] && ENV['REDIS_URL'] != '' && ENV['REDIS_NO_VERIFY_MODE']
+          @redis ||= Redis.new(url: ENV['REDIS_URL'], ssl_params: { verify_mode: OpenSSL::SSL::VERIFY_NONE })
+        elsif ENV['REDIS_URL'] && ENV['REDIS_URL'] != ''
           @redis ||= Redis.new(url: ENV['REDIS_URL'])
         else
           @redis ||= Redis.new
