@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    trophonius (2.1.5.1)
+    trophonius (2.1.6)
       activesupport (>= 6.0)
       redis (~> 4.0)
       typhoeus (~> 1.3)
@@ -9,7 +9,7 @@ PATH
 GEM
   remote: https://rubygems.org/
   specs:
-    activesupport (7.1.3.4)
+    activesupport (7.1.4)
       base64
       bigdecimal
       concurrent-ruby (~> 1.0, >= 1.0.2)
@@ -21,7 +21,7 @@ GEM
       tzinfo (~> 2.0)
     base64 (0.2.0)
     bigdecimal (3.1.8)
-    concurrent-ruby (1.3.1)
+    concurrent-ruby (1.3.4)
     connection_pool (2.4.1)
     drb (2.2.1)
     ethon (0.16.0)
@@ -29,7 +29,7 @@ GEM
     ffi (1.17.0-x86_64-darwin)
     i18n (1.14.5)
       concurrent-ruby (~> 1.0)
-    minitest (5.23.1)
+    minitest (5.25.1)
     mutex_m (0.2.0)
     redis (4.8.1)
     typhoeus (1.4.1)
