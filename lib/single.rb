@@ -13,6 +13,14 @@ module Trophonius
       @all_fields = {}
     end
 
+    def non_modifiable_fields
+      []
+    end
+
+    def layout_name
+      @config[:layout_name]
+    end
+
     def where(fieldData)
       uri = URI::RFC2396_Parser.new
       url =
@@ -114,7 +122,7 @@ module Trophonius
     private
 
     def build_result(result)
-      hash = Trophonius::Record.new(result, 'Single')
+      record = Trophonius::Record.new(result, self)
       record.layout_name = @config[:layout_name]
       record
     end

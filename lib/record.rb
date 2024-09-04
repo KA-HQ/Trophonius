@@ -22,7 +22,7 @@ module Trophonius
       @modifiable_fields = {}
       @modified_fields = {}
       @model_name = model
-      @model = ActiveSupport::Inflector.constantize(ActiveSupport::Inflector.classify(ActiveSupport::Inflector.singularize(model_name)))
+      @model = model_name.class == String ? ActiveSupport::Inflector.constantize(ActiveSupport::Inflector.classify(ActiveSupport::Inflector.singularize(model_name))) : model_name
       @layout_name = @model.layout_name
       define_field_methods(fm_record)
       define_portal_methods(fm_record)
