@@ -181,11 +181,11 @@ module Trophonius
     # @return [True] if successful
     def save
       url = "layouts/#{layout_name}/records/#{record_id}"
-      
-      @model.before_update
+
+      @model.run_before_update
       body = "{\"fieldData\": #{modified_fields.to_json}}"
       response = DatabaseRequest.make_request(url, 'patch', body)
-      @model.after_update
+      @model.run_after_update
       response['messages'][0]['code'] == '0' ? true : Error.throw_error(response['messages'][0]['code'])
     end
 
@@ -197,9 +197,9 @@ module Trophonius
     def delete
       url = "layouts/#{layout_name}/records/#{record_id}"
 
-      @model.before_destroy
+      @model.run_before_destroy
       response = DatabaseRequest.make_request(url, 'delete', '{}')
-      @model.after_destroy
+      @model.run_after_destroy
       response['messages'][0]['code'] == '0' ? true : Error.throw_error(response['messages'][0]['code'])
     end
 
@@ -214,7 +214,7 @@ module Trophonius
       url = "layouts/#{layout_name}/records/#{record_id}"
       field_data.each_key { |field| modifiable_fields[field] = field_data[field] }
       field_data.transform_keys! { |k| (@model.translations[k.to_s] || k).to_s }
-      @model.before_update
+      @model.run_before_update
 
       portal_data.each do |portal_name, values|
         values.map do |record|
@@ -237,7 +237,7 @@ module Trophonius
       return throw_field_missing(field_data) if code == '102'
       return Error.throw_error(code) if code != '0'
 
-      @model.after_update
+      @model.run_after_update
       true
     end
 
