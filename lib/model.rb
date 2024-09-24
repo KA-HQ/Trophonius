@@ -42,9 +42,9 @@ module Trophonius
       @limit = ''
     end
 
-    def self.scope(name, procedure)
+    def self.scope(name, procedure, *args)
       define_singleton_method(name) do
-        procedure.call
+        procedure.call(args)
       end
     end
 
