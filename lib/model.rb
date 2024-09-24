@@ -44,10 +44,7 @@ module Trophonius
 
     def self.scope(name, procedure, *_args)
       define_singleton_method(name) do |*args|
-        puts procedure.arity
-        p procedure.call(args)
-        p args
-        procedure.arity.zero? ? procedure.call : procedure.call(args)
+        procedure.arity.zero? ? procedure.call : procedure.call(*args)
       end
     end
 
@@ -59,7 +56,7 @@ module Trophonius
       @configuration.callbacks[:after_create].each do |callback|
         procedure = callback[:name]
         args = callback[:args]
-        procedure.is_a?(Proc) ? procedure.call(args) : send(procedure, args)
+        procedure.is_a?(Proc) ? procedure.call(*args) : send(procedure, *args)
       end
     end
 
@@ -71,7 +68,7 @@ module Trophonius
       @configuration.callbacks[:after_update].each do |callback|
         procedure = callback[:name]
         args = callback[:args]
-        procedure.is_a?(Proc) ? procedure.call(args) : send(procedure, args)
+        procedure.is_a?(Proc) ? procedure.call(*args) : send(procedure, *args)
       end
     end
 
@@ -83,7 +80,7 @@ module Trophonius
       @configuration.callbacks[:after_destroy].each do |callback|
         procedure = callback[:name]
         args = callback[:args]
-        procedure.is_a?(Proc) ? procedure.call(args) : send(procedure, args)
+        procedure.is_a?(Proc) ? procedure.call(*args) : send(procedure, *args)
       end
     end
 
@@ -95,7 +92,7 @@ module Trophonius
       @configuration.callbacks[:before_create].each do |callback|
         procedure = callback[:name]
         args = callback[:args]
-        procedure.is_a?(Proc) ? procedure.call(args) : send(procedure, args)
+        procedure.is_a?(Proc) ? procedure.call(*args) : send(procedure, *args)
       end
     end
 
@@ -107,7 +104,7 @@ module Trophonius
       @configuration.callbacks[:before_update].each do |callback|
         procedure = callback[:name]
         args = callback[:args]
-        procedure.is_a?(Proc) ? procedure.call(args) : send(procedure, args)
+        procedure.is_a?(Proc) ? procedure.call(*args) : send(procedure, *args)
       end
     end
 
@@ -119,7 +116,7 @@ module Trophonius
       @configuration.callbacks[:before_destroy].each do |callback|
         procedure = callback[:name]
         args = callback[:args]
-        procedure.is_a?(Proc) ? procedure.call(args) : send(procedure, args)
+        procedure.is_a?(Proc) ? procedure.call(*args) : send(procedure, *args)
       end
     end
 
