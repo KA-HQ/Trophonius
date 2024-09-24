@@ -53,8 +53,6 @@ module Trophonius
     end
 
     def self.run_after_create
-      puts @configuration
-      puts @configuration.callbacks
       @configuration.callbacks[:after_create].each do |callback|
         procedure = callback[:name]
         args = callback[:args]
