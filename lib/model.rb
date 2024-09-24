@@ -22,6 +22,7 @@ module Trophonius
       @configuration = config
       @offset = ''
       @limit = ''
+      @callbacks = { before_create: [], before_update: [], before_destroy: [], after_create: [], after_update: [], after_destroy: [] }
     end
 
     ##
@@ -44,6 +45,78 @@ module Trophonius
     def self.scope(name, procedure)
       define_singleton_method(name) do
         procedure.call
+      end
+    end
+
+    def self.after_create(procedure, args)
+      @callbacks[:after_create].push({ name: procedure, args: args })
+    end
+
+    def self.run_after_create
+      @callbacks[:after_create].each do |callback|
+        procedure = callback[:name]
+        args = callback[:args]
+        procedure.is_a?(Proc) ? procedure.call(args) : send(procedure, args)
+      end
+    end
+
+    def self.after_update(procedure, args)
+      @callbacks[:after_update].push({ name: procedure, args: args })
+    end
+
+    def self.run_after_update
+      @callbacks[:after_update].each do |callback|
+        procedure = callback[:name]
+        args = callback[:args]
+        procedure.is_a?(Proc) ? procedure.call(args) : send(procedure, args)
+      end
+    end
+
+    def self.after_destroy(procedure, args)
+      @callbacks[:after_destroy].push({ name: procedure, args: args })
+    end
+
+    def self.run_after_destroy
+      @callbacks[:after_destroy].each do |callback|
+        procedure = callback[:name]
+        args = callback[:args]
+        procedure.is_a?(Proc) ? procedure.call(args) : send(procedure, args)
+      end
+    end
+
+    def self.before_create(procedure, args)
+      @callbacks[:before_create].push({ name: procedure, args: args })
+    end
+
+    def self.run_before_create
+      @callbacks[:before_create].each do |callback|
+        procedure = callback[:name]
+        args = callback[:args]
+        procedure.is_a?(Proc) ? procedure.call(args) : send(procedure, args)
+      end
+    end
+
+    def self.before_update(procedure, args)
+      @callbacks[:before_update].push({ name: procedure, args: args })
+    end
+
+    def self.run_before_update
+      @callbacks[:before_update].each do |callback|
+        procedure = callback[:name]
+        args = callback[:args]
+        procedure.is_a?(Proc) ? procedure.call(args) : send(procedure, args)
+      end
+    end
+
+    def self.before_destroy(procedure, args)
+      @callbacks[:before_destroy].push({ name: procedure, args: args })
+    end
+
+    def self.run_before_destroy
+      @callbacks[:before_destroy].each do |callback|
+        procedure = callback[:name]
+        args = callback[:args]
+        procedure.is_a?(Proc) ? procedure.call(args) : send(procedure, args)
       end
     end
 
@@ -196,6 +269,7 @@ module Trophonius
     #   Model.create(fieldOne: "Data")
     def self.create(field_data, portal_data: {})
       create_translations if @configuration.translations.keys.empty?
+      run_before_create
 
       field_data.transform_keys! { |k| (@configuration.translations[k.to_s] || k).to_s }
 
@@ -215,6 +289,8 @@ module Trophonius
       new_record = DatabaseRequest.make_request("/layouts/#{layout_name}/records/#{response['response']['recordId']}", 'get', '{}')
       record = build_result(new_record['response']['data'][0])
       record.send(:define_singleton_method, 'result_count') { 1 }
+      run_after_create
+
       record
     end
 
@@ -274,6 +350,7 @@ module Trophonius
 
       url = "layouts/#{layout_name}/records/#{record_id}"
       response = DatabaseRequest.make_request(url, 'delete', '{}')
+
       if response['messages'][0]['code'] == '0'
         true
       else
