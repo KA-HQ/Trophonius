@@ -38,6 +38,7 @@ module Trophonius
       @configuration.translations = {}
       @configuration.has_many_relations = {}
       @configuration.belongs_to_relations = {}
+      @callbacks = { before_create: [], before_update: [], before_destroy: [], after_create: [], after_update: [], after_destroy: [] }
       @offset = ''
       @limit = ''
     end
