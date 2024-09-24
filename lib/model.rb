@@ -41,6 +41,12 @@ module Trophonius
       @limit = ''
     end
 
+    def self.scope(name, procedure)
+      define_singleton_method(name) do
+        procedure.call
+      end
+    end
+
     ##
     # Add a belongs to relationship.
     #
