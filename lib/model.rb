@@ -43,8 +43,8 @@ module Trophonius
     end
 
     def self.scope(name, procedure, *args)
-      define_singleton_method(name) do
-        procedure.call(args)
+      define_singleton_method(name, args) do
+        procedure.arity.positive? ? procedure.call(args) : procedure.call
       end
     end
 
