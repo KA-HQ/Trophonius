@@ -200,6 +200,57 @@ To run a FileMaker script from the context of a model you can call the run_scrip
   MyModel.run_script(script: "My Awesome Script", scriptparameter: "ScriptParameter") #the script parameter is optional
 ```
 
+## Callbacks
+
+A model can have 6 different types of callbacks: ```before_create, after_create, before_update, after_update, before_delete, after_delete```. The callbacks have 2 arguments: a method name or lambda and the arguments to pass to the callback method/lambda.
+
+```ruby
+  class MyModel < Trophonius::Model
+    before_create :run_this_before_created_in_filemaker, [1, 2, 3]
+    after_create :run_this_after_created_in_filemaker, [3, 2, 1]
+
+    before_update :run_this_before_updated_in_filemaker, [4, 5, 6]
+    after_update :run_this_after_updated_in_filemaker, [6, 5, 4]
+
+    before_destroy :run_this_before_destroyed_in_filemaker, [7, 8, 9]
+    after_destroy :run_this_after_destroyed_in_filemaker, [9, 8, 7]
+
+    def self.run_this_before_created_in_filemaker(array)
+      puts array
+    end
+
+    def self.run_this_after_created_in_filemaker(array)
+      puts array
+    end
+
+    def self.run_this_before_updated_in_filemaker(array)
+      puts array
+    end
+
+    def self.run_this_after_updated_in_filemaker(array)
+      puts array
+    end
+
+    def self.run_this_before_destroyed_in_filemaker(array)
+      puts array
+    end
+
+    def self.run_this_after_destroyed_in_filemaker(array)
+      puts array
+    end
+  end
+```
+
+## Scopes
+
+Scopes are custom find requests that you define inside your Trophonius models with the ```scope``` method.
+
+```ruby
+  class MyModel < Trophonius::Model
+    scope :my_field, -> { where({ my_field: 'Yes' }) }
+  end
+```
+
 ## Date and Time
 
 The FileMaker Data API requires dates to be formatted as MM/DD/YYYY. To make this easier Trophonius adds "to_fm" methods to the Date and Time classes to format these types more easily.
