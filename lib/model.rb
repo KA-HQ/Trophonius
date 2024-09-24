@@ -15,14 +15,13 @@ module Trophonius
   # This class will retrieve the records from the FileMaker database and build a RecordSet filled with Record objects.
   # One Record object represents a record in FileMaker.
   class Model
-    attr_reader :configuration, :callbacks
+    attr_reader :configuration
     attr_accessor :current_query
 
     def initialize(config:)
       @configuration = config
       @offset = ''
       @limit = ''
-      @callbacks = { before_create: [], before_update: [], before_destroy: [], after_create: [], after_update: [], after_destroy: [] }
     end
 
     ##
@@ -38,7 +37,7 @@ module Trophonius
       @configuration.translations = {}
       @configuration.has_many_relations = {}
       @configuration.belongs_to_relations = {}
-      @callbacks = { before_create: [], before_update: [], before_destroy: [], after_create: [], after_update: [], after_destroy: [] }
+      @configuration.callbacks = { before_create: [], before_update: [], before_destroy: [], after_create: [], after_update: [], after_destroy: [] }
       @offset = ''
       @limit = ''
     end
@@ -50,11 +49,11 @@ module Trophonius
     end
 
     def self.after_create(procedure, args)
-      @callbacks[:after_create].push({ name: procedure, args: args })
+      @configuration.callbacks[:after_create].push({ name: procedure, args: args })
     end
 
     def self.run_after_create
-      @callbacks[:after_create].each do |callback|
+      @configuration.callbacks[:after_create].each do |callback|
         procedure = callback[:name]
         args = callback[:args]
         procedure.is_a?(Proc) ? procedure.call(args) : send(procedure, args)
@@ -62,11 +61,11 @@ module Trophonius
     end
 
     def self.after_update(procedure, args)
-      @callbacks[:after_update].push({ name: procedure, args: args })
+      @configuration.callbacks[:after_update].push({ name: procedure, args: args })
     end
 
     def self.run_after_update
-      @callbacks[:after_update].each do |callback|
+      @configuration.callbacks[:after_update].each do |callback|
         procedure = callback[:name]
         args = callback[:args]
         procedure.is_a?(Proc) ? procedure.call(args) : send(procedure, args)
@@ -74,11 +73,11 @@ module Trophonius
     end
 
     def self.after_destroy(procedure, args)
-      @callbacks[:after_destroy].push({ name: procedure, args: args })
+      @configuration.callbacks[:after_destroy].push({ name: procedure, args: args })
     end
 
     def self.run_after_destroy
-      @callbacks[:after_destroy].each do |callback|
+      @configuration.callbacks[:after_destroy].each do |callback|
         procedure = callback[:name]
         args = callback[:args]
         procedure.is_a?(Proc) ? procedure.call(args) : send(procedure, args)
@@ -86,11 +85,11 @@ module Trophonius
     end
 
     def self.before_create(procedure, args)
-      @callbacks[:before_create].push({ name: procedure, args: args })
+      @configuration.callbacks[:before_create].push({ name: procedure, args: args })
     end
 
     def self.run_before_create
-      @callbacks[:before_create].each do |callback|
+      @configuration.callbacks[:before_create].each do |callback|
         procedure = callback[:name]
         args = callback[:args]
         procedure.is_a?(Proc) ? procedure.call(args) : send(procedure, args)
@@ -98,11 +97,11 @@ module Trophonius
     end
 
     def self.before_update(procedure, args)
-      @callbacks[:before_update].push({ name: procedure, args: args })
+      @configuration.callbacks[:before_update].push({ name: procedure, args: args })
     end
 
     def self.run_before_update
-      @callbacks[:before_update].each do |callback|
+      @configuration.callbacks[:before_update].each do |callback|
         procedure = callback[:name]
         args = callback[:args]
         procedure.is_a?(Proc) ? procedure.call(args) : send(procedure, args)
@@ -110,11 +109,11 @@ module Trophonius
     end
 
     def self.before_destroy(procedure, args)
-      @callbacks[:before_destroy].push({ name: procedure, args: args })
+      @configuration.callbacks[:before_destroy].push({ name: procedure, args: args })
     end
 
     def self.run_before_destroy
-      @callbacks[:before_destroy].each do |callback|
+      @configuration.callbacks[:before_destroy].each do |callback|
         procedure = callback[:name]
         args = callback[:args]
         procedure.is_a?(Proc) ? procedure.call(args) : send(procedure, args)

@@ -26,5 +26,6 @@ module Trophonius
     config_accessor(:redis_no_verify) { false }
     config_accessor(:pool_size) { 5 }
     config_accessor(:debug) { false }
+    config_accessor(:callbacks) { { before_create: [], before_update: [], before_destroy: [], after_create: [], after_update: [], after_destroy: [] } }
   end
 end
