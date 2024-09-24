@@ -15,7 +15,7 @@ module Trophonius
   # This class will retrieve the records from the FileMaker database and build a RecordSet filled with Record objects.
   # One Record object represents a record in FileMaker.
   class Model
-    attr_reader :configuration
+    attr_reader :configuration, :callbacks
     attr_accessor :current_query
 
     def initialize(config:)
