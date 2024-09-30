@@ -202,21 +202,21 @@ To run a FileMaker script from the context of a model you can call the run_scrip
 
 ## Callbacks
 
-A model can have 6 different types of callbacks: ```before_create, after_create, before_update, after_update, before_delete, after_delete```. The callbacks have 2 arguments: a method name or lambda and the arguments to pass to the callback method/lambda.
+A model can have 6 different types of callbacks: ```before_create, after_create, before_update, after_update, before_delete, after_delete```. The callbacks have 2 arguments: a method name or lambda and the arguments to pass to the callback method/lambda. Arguments should be passed as a string.
 
 ```ruby
   class MyModel < Trophonius::Model
-    before_create :run_this_before_created_in_filemaker, [1, 2, 3]
-    after_create :run_this_after_created_in_filemaker, [3, 2, 1]
+    before_create :run_this_before_created_in_filemaker, [[1, 2, 3], 'second argument']
+    after_create :run_this_after_created_in_filemaker, [[3, 2, 1]]
 
-    before_update :run_this_before_updated_in_filemaker, [4, 5, 6]
-    after_update :run_this_after_updated_in_filemaker, [6, 5, 4]
+    before_update :run_this_before_updated_in_filemaker, [[4, 5, 6]]
+    after_update :run_this_after_updated_in_filemaker, [[6, 5, 4]]
 
-    before_destroy :run_this_before_destroyed_in_filemaker, [7, 8, 9]
-    after_destroy :run_this_after_destroyed_in_filemaker, [9, 8, 7]
+    before_destroy :run_this_before_destroyed_in_filemaker, [[7, 8, 9]]
+    after_destroy :run_this_after_destroyed_in_filemaker, [[9, 8, 7]]
 
-    def self.run_this_before_created_in_filemaker(array)
-      puts array
+    def self.run_this_before_created_in_filemaker(array, string)
+      puts "#{array.length}, #{string}"
     end
 
     def self.run_this_after_created_in_filemaker(array)
