@@ -30,13 +30,7 @@ module Trophonius
     end
 
     def to_param
-      if methods.include? :id
-        id.to_s
-      elsif methods.include? :primary_key
-        primary_key.to_s
-      else
-        Error.throw_error('102', 'Primary Key field not found', layout_name)
-      end
+      record_id.to_s
     end
 
     def []=(field, new_val)
