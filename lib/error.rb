@@ -18,6 +18,7 @@ module Trophonius
     class FileError < StandardError; end # :nodoc:
     class CommandError < StandardError; end # :nodoc:
     class ConnectionError < StandardError; end # :nodoc:
+    class FileNotOpenError < StandardError; end # :nodoc:
     class EmptyFindError < StandardError; end # :nodoc:
     class ValidationError < StandardError; end # :nodoc:
     class DateValueError < ValidationError; end # :nodoc:
@@ -223,7 +224,9 @@ module Trophonius
         # when "738"
         # when "800"
         # when "801"
-        # when "802"
+      when '802'
+      when '802'
+        raise FileNotOpenError.new, 'Could not open FileMaker file on server'
         # when "803"
         # when "804"
         # when "805"
