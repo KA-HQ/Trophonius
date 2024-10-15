@@ -171,7 +171,7 @@ module Trophonius
     # Tests whether the FileMaker token is still valid
     # @return [Boolean] True if the token is valid False if invalid
     def test_connection
-      return last_connection.nil? || last_connection < Time.now - (15 * 60) if Trophonius.config.layout_name == ''
+      return !last_connection.nil? && last_connection > Time.now - (15 * 60) if Trophonius.config.layout_name == ''
 
       path = "/layouts/#{Trophonius.config.layout_name}/records?_limit=1"
       response =
