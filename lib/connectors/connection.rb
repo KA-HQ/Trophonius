@@ -174,8 +174,10 @@ module Trophonius
       return !last_connection.nil? && last_connection > Time.now - (15 * 60) if Trophonius.config.layout_name == ''
 
       path = "/layouts/#{Trophonius.config.layout_name}/records?_limit=1"
+
+      token_to_check = Trophonius.config.redis_connection ? Trophonius::RedisManager.get_key(key: 'token') : @token
       response =
-        Trophonius::DatabaseRequest.make_request(path, :get, {}, bypass_queue_with: "Bearer #{@token}")
+        Trophonius::DatabaseRequest.make_request(path, :get, {}, bypass_queue_with: "Bearer #{token_to_check}")
       response['messages'][0]['code'] == '0'
     rescue StandardError => e
       puts e
