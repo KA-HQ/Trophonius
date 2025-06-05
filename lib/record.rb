@@ -24,8 +24,8 @@ module Trophonius
       @model_name = model
       @model = model_name.instance_of?(String) ? ActiveSupport::Inflector.constantize(ActiveSupport::Inflector.classify(ActiveSupport::Inflector.singularize(model_name))) : model_name
       @layout_name = @model.layout_name
-      define_field_methods(fm_record)
-      define_portal_methods(fm_record)
+      define_field_methods(fm_record) if fm_record.present?
+      define_portal_methods(fm_record) if fm_record.present?
       super()
     end
 
