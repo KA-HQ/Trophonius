@@ -30,6 +30,8 @@ module Trophonius
     # Disconnects from the FileMaker server
     #
     def disconnect
+      return unless test_connection
+
       uri = URI::RFC2396_Parser.new
       url =
         URI(
