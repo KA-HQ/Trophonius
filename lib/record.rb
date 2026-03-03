@@ -22,8 +22,9 @@ module Trophonius
       @modifiable_fields = {}
       @modified_fields = {}
       @model_name = model
-      @model = model_name.instance_of?(String) ? ActiveSupport::Inflector.constantize(ActiveSupport::Inflector.classify(ActiveSupport::Inflector.singularize(model_name))) : model_name
+      @model = model_name.instance_of?(String) ? constantize_model(model_name) : model_name
       @layout_name = @model.layout_name
+      @portals = []
       define_field_methods(fm_record) if fm_record.present?
       define_portal_methods(fm_record) if fm_record.present?
       super()
@@ -41,119 +42,34 @@ module Trophonius
 
     def method_missing(method, *args, &block)
       if ActiveSupport::Inflector.pluralize(method).to_s == method.to_s
-        model = ActiveSupport::Inflector.constantize(ActiveSupport::Inflector.classify(ActiveSupport::Inflector.singularize(method)))
-        pk_model = ActiveSupport::Inflector.constantize(ActiveSupport::Inflector.classify(ActiveSupport::Inflector.singularize(model_name)))
-
-        if model.belongs_to_relations[ActiveSupport::Inflector.parameterize(model_name).to_sym]
-          relation = model.belongs_to_relations[ActiveSupport::Inflector.parameterize(model_name).to_sym]
-          layout = model.layout_name
-          model.create_translations if model.translations.keys.empty?
-
-          url = "/layouts/#{layout}/_find"
-          foreign_key_field = if model.translations.key?(relation[:foreign_key])
-                                model.translations[relation[:foreign_key]].to_s
-                              else
-                                relation[:foreign_key].to_s
-                              end
-
-          primary_key_field = if pk_model.translations.key?(relation[:primary_key])
-                                pk_model.translations[relation[:primary_key]].to_s
-                              else
-                                relation[:primary_key].to_s
-                              end
-
-          body = { query: [{ foreign_key_field => self[primary_key_field].to_s }], limit: 100_000 }.to_json
-          response = DatabaseRequest.make_request(url, 'post', body)
-
-          if response['messages'][0]['code'] == '0'
-            r_results = response['response']['data']
-            ret_val = RecordSet.new(layout, model.non_modifiable_fields)
-            r_results.each do |r|
-              hash = model.build_result(r)
-              ret_val << hash
-            end
-            @response = ret_val
-            @response
-          elsif response['messages'][0]['code'] == '101' || response['messages'][0]['code'] == '401'
-            RecordSet.new(layout, model.non_modifiable_fields)
-
-          else
-            if response['messages'][0]['code'] == '102'
-              results = DatabaseRequest.retrieve_first(layout)
-              if results['messages'][0]['code'] == '0'
-                r_results = results['response']['data']
-                ret_val = r_results.empty? ? Error.throw_error('102') : r_results[0]['fieldData']
-                query_keys = [foreign_key_field]
-                Error.throw_error('102', (query_keys - ret_val.keys.map(&:downcase)).flatten.join(', '), layout)
-              else
-                Error.throw_error('102')
-              end
-            end
-            Error.throw_error(response['messages'][0]['code'])
-          end
-        end
-      elsif ActiveSupport::Inflector.constantize(ActiveSupport::Inflector.classify(ActiveSupport::Inflector.singularize(method))).respond_to?('first')
-        fk_model = ActiveSupport::Inflector.constantize(ActiveSupport::Inflector.classify(ActiveSupport::Inflector.singularize(model_name)))
-        pk_model = ActiveSupport::Inflector.constantize(ActiveSupport::Inflector.classify(ActiveSupport::Inflector.singularize(method)))
-
-        if pk_model.has_many_relations[ActiveSupport::Inflector.parameterize(ActiveSupport::Inflector.pluralize(model_name)).to_sym]
-          relation = pk_model.has_many_relations[ActiveSupport::Inflector.parameterize(ActiveSupport::Inflector.pluralize(model_name)).to_sym]
-          layout = pk_model.layout_name
-          pk_model.create_translations if pk_model.translations.keys.empty?
-
-          url = "/layouts/#{layout}/_find"
-
-          foreign_key_field = if fk_model.translations.key?(relation[:foreign_key])
-                                fk_model.translations[relation[:foreign_key]].to_s
-                              else
-                                relation[:foreign_key].to_s
-                              end
-
-          primary_key_field = if pk_model.translations.key?(relation[:primary_key])
-                                pk_model.translations[relation[:primary_key]].to_s
-                              else
-                                relation[:primary_key].to_s
-                              end
-
-          body = { query: [{ primary_key_field => self[foreign_key_field].to_s }], limit: 1 }.to_json
-
-          response = DatabaseRequest.make_request(url, 'post', body)
-          if response['messages'][0]['code'] == '0'
-            r_results = response['response']['data']
-            ret_val = RecordSet.new(layout, pk_model.non_modifiable_fields)
-            r_results.each do |r|
-              hash = pk_model.build_result(r)
-              ret_val << hash
-            end
-            @response = ret_val
-            @response.first
-          elsif response['messages'][0]['code'] == '101' || response['messages'][0]['code'] == '401'
-            RecordSet.new(layout, pk_model.non_modifiable_fields)
-
-          else
-            if response['messages'][0]['code'] == '102'
-              results = DatabaseRequest.retrieve_first(layout)
-              if results['messages'][0]['code'] == '0'
-                r_results = results['response']['data']
-                ret_val = r_results.empty? ? Error.throw_error('102') : r_results[0]['fieldData']
-                query_keys = [primary_key_field]
-                Error.throw_error('102', (query_keys - ret_val.keys.map(&:downcase)).flatten.join(', '), layout)
-              else
-                Error.throw_error('102')
-              end
-            end
-            Error.throw_error(response['messages'][0]['code'])
-          end
-        end
-      else
-        super
+        result = find_has_many_relation(method)
+        return result if result
+      elsif constantize_model(method).respond_to?('first')
+        result = find_belongs_to_relation(method)
+        return result if result
       end
+
+      super
     rescue NameError => e
       if e.message.include?('constant')
         Error.throw_error('102', e.message.split(' ')[-1], layout_name)
       else
         raise e
       end
+    end
+
+    def respond_to_missing?(method, include_private = false)
+      if ActiveSupport::Inflector.pluralize(method).to_s == method.to_s
+        target_model = constantize_model(method)
+        return true if target_model.belongs_to_relations[parameterize_name(model_name)]
+      else
+        target_model = constantize_model(method)
+        relation_key = parameterize_name(ActiveSupport::Inflector.pluralize(model_name))
+        return true if target_model.has_many_relations[relation_key]
+      end
+      super
+    rescue NameError
+      super
     end
 
     ##
@@ -216,6 +132,9 @@ module Trophonius
     # @return [True] if successful
     def update(field_data, portal_data: {})
       url = "layouts/#{layout_name}/records/#{record_id}"
+      differences = calculate_differences_before_update(field_data, portal_data)
+      return if  differences.all? { |diff| diff.length.zero? }
+
       field_data.each_key { |field| modifiable_fields[field] = field_data[field] }
       field_data.transform_keys! { |k| (@model.translations[k.to_s] || k).to_s }
       @model.run_before_update
@@ -289,6 +208,7 @@ module Trophonius
     def define_portal_methods(fm_record)
       fm_record['portalData'].each_key do |key|
         method_name = methodize_field(key)
+        @portals.push(key)
         define_singleton_method(method_name) { self[key] }
         fm_record['portalData'][key].each do |portal_record|
           portal_record.each_key do |inner_key|
@@ -310,6 +230,112 @@ module Trophonius
       else
         Error.throw_error('102')
       end
+    end
+
+    def constantize_model(name)
+      ActiveSupport::Inflector.constantize(
+        ActiveSupport::Inflector.classify(
+          ActiveSupport::Inflector.singularize(name.to_s)
+        )
+      )
+    end
+
+    def parameterize_name(name)
+      ActiveSupport::Inflector.parameterize(name.to_s).to_sym
+    end
+
+    def resolve_field(model, field_key)
+      model.create_translations if model.translations.keys.empty?
+      if model.translations.key?(field_key)
+        model.translations[field_key].to_s
+      else
+        field_key.to_s
+      end
+    end
+
+    def build_relation_record_set(model, layout, data)
+      ret_val = RecordSet.new(layout, model.non_modifiable_fields)
+      data.each { |r| ret_val << model.build_result(r) }
+      ret_val
+    end
+
+    def handle_relation_field_error(code, query_field, layout)
+      return unless code == '102'
+
+      results = DatabaseRequest.retrieve_first(layout)
+      if results['messages'][0]['code'] == '0'
+        r_results = results['response']['data']
+        if r_results.empty?
+          Error.throw_error('102')
+        else
+          ret_val = r_results[0]['fieldData']
+          Error.throw_error('102', ([query_field] - ret_val.keys.map(&:downcase)).flatten.join(', '), layout)
+        end
+      else
+        Error.throw_error('102')
+      end
+    end
+
+    def execute_relation_query(target_model, query_field, query_value, limit:)
+      layout = target_model.layout_name
+      url = "/layouts/#{layout}/_find"
+      body = { query: [{ query_field => query_value.to_s }], limit: limit }.to_json
+      response = DatabaseRequest.make_request(url, 'post', body)
+      code = response['messages'][0]['code']
+
+      if code == '0'
+        build_relation_record_set(target_model, layout, response['response']['data'])
+      elsif code == '101' || code == '401'
+        RecordSet.new(layout, target_model.non_modifiable_fields)
+      else
+        handle_relation_field_error(code, query_field, layout)
+        Error.throw_error(code)
+      end
+    end
+
+    def find_has_many_relation(method)
+      target_model = constantize_model(method)
+      current_model = constantize_model(model_name)
+      relation = target_model.belongs_to_relations[parameterize_name(model_name)]
+      return nil unless relation
+
+      foreign_key_field = resolve_field(target_model, relation[:foreign_key])
+      primary_key_field = resolve_field(current_model, relation[:primary_key])
+
+      @response = execute_relation_query(
+        target_model,
+        foreign_key_field,
+        self[primary_key_field],
+        limit: 100_000
+      )
+    end
+
+    def find_belongs_to_relation(method)
+      current_model = constantize_model(model_name)
+      target_model = constantize_model(method)
+      relation = target_model.has_many_relations[parameterize_name(ActiveSupport::Inflector.pluralize(model_name))]
+      return nil unless relation
+
+      foreign_key_field = resolve_field(current_model, relation[:foreign_key])
+      primary_key_field = resolve_field(target_model, relation[:primary_key])
+
+      @response = execute_relation_query(
+        target_model,
+        primary_key_field,
+        self[foreign_key_field],
+        limit: 1
+      )
+      @response.first
+    end
+
+    def calculate_differences_before_update(field_data, portal_data)
+      fields = self.reject { |k,v| @portals.include?(k) || !field_data.keys.include?(k) }
+      portals = self.select { |k,v| @portals.include?(k) && portal_data.keys.include?(k) }
+
+      updated_fields = field_data.present? ? field_data.to_set - fields.to_set  : []
+      updated_portals = portal_data.present? ? portal_data.to_set - portals.to_set : []
+
+      [updated_fields.to_h, updated_portals.to_h]
     end
   end
 end
