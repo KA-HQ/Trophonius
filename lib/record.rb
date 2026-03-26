@@ -133,7 +133,9 @@ module Trophonius
     def update(field_data, portal_data: {})
       url = "layouts/#{layout_name}/records/#{record_id}"
       differences = calculate_differences_before_update(field_data, portal_data)
-      return if  differences.all? { |diff| diff.length.zero? }
+      puts differences
+      puts differences.all? { |diff| diff.length.zero? }
+      return if differences.all? { |diff| diff.length.zero? }
 
       field_data.each_key { |field| modifiable_fields[field] = field_data[field] }
       field_data.transform_keys! { |k| (@model.translations[k.to_s] || k).to_s }
