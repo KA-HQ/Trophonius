@@ -336,6 +336,10 @@ module Trophonius
 
       updated_fields = field_data.present? ? field_data.to_set - fields.to_set  : []
       updated_portals = portal_data.present? ? portal_data.to_set - portals.to_set : []
+      puts "OLD"
+      puts portals.to_set
+      puts "NEW"
+      puts portal_data.to_set
 
       [updated_fields.to_h, updated_portals.to_h]
     end
