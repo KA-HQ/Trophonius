@@ -210,7 +210,10 @@ module Trophonius
     def define_portal_methods(fm_record)
       fm_record['portalData'].each_key do |key|
         method_name = methodize_field(key)
+        relation_name = portal_relation_name(fm_record.dig('portalData', key, 0))
         @portals.push(key)
+        @portals.push(relation_name) unless relation_name == key
+
         define_singleton_method(method_name) { self[key] }
         fm_record['portalData'][key].each do |portal_record|
           portal_record.each_key do |inner_key|
@@ -336,10 +339,6 @@ module Trophonius
 
       updated_fields = field_data.present? ? field_data.to_set - fields.to_set  : []
       updated_portals = portal_data.present? ? portal_data.to_set - portals.to_set : []
-      puts "OLD"
-      puts portals.to_set
-      puts "NEW"
-      puts portal_data.to_set
 
       [updated_fields.to_h, updated_portals.to_h]
     end
