@@ -27,7 +27,8 @@ module Trophonius
     end
 
     def disconnect_all
-      @connections.each { |_connection_id, connection| connection[:connection].disconnect }
+      @connections.reject { |_connection_id, connection| connection[:token].blank? }
+                  .each { |_connection_id, connection| connection[:connection].disconnect }
     end
 
     private
