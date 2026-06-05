@@ -5,7 +5,9 @@ require 'active_support/inflector'
 module Trophonius
   module Translator
     def methodize_field(field_name)
-      ActiveSupport::Inflector.parameterize(ActiveSupport::Inflector.underscore(field_name), separator: '_').downcase
+      method_name = ActiveSupport::Inflector.parameterize(ActiveSupport::Inflector.underscore(field_name), separator: '_').downcase
+
+      method_name == 'object_id' ? method_name.gsub('_', '') : method_name
     end
 
     def methodize_portal_field(field_name)
